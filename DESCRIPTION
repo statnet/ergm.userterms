@@ -1,0 +1,14 @@
+Package: ergmuserterms
+Version: 2.1
+Date: 2008-05-01
+Title:  User-specified terms for the statnet suite of packages
+Author: Mark S. Handcock <handcock@stat.washington.edu>,
+        David R. Hunter <dhunter@stat.psu.edu>,
+        Carter T. Butts <buttsc@uci.edu>,
+        Steven M. Goodreau <goodreau@u.washington.edu>,
+        Martina Morris <morrism@u.washington.edu>
+Maintainer: Mark S. Handcock <handcock@stat.washington.edu>
+Depends: network, ergm
+Description:  A template package to demonstrate the use of user-specified statistics for use in "ergm" models as part of the "statnet" suote of packages.
+License: file LICENSE
+URL: http://statnetproject.org

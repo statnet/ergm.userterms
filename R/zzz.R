@@ -1,0 +1,24 @@
+######################################################################
+#
+# .First.lib is run when the package is loaded.
+#
+
+.First.lib <- function(lib, pkg){
+    library.dynam("ergmuserterms", pkg, lib)
+    ergmdesc <- packageDescription("ergmuserterms")
+    cat('\nergmuserterms:', gsub("\n"," ",ergmdesc$Title),
+        '\nVersion', ergmdesc$Version, 'created on', ergmdesc$Date, '\n') 
+    cat(paste("copyright (c) 2003, Mark S. Handcock, University of Washington\n",
+"                    David R. Hunter, Penn State University\n",
+"                    Carter T. Butts, University of California-Irvine\n",
+"                    Steven M. Goodreau, University of Washington\n",
+"                    Martina Morris, University of Washington\n",sep=""))
+    cat('Type help(package="ergmuserterms") to get started.\n\n')
+    cat('Based on "statnet" project software (http://statnetproject.org).\n',
+        'For license and citation information type citation("ergmuserterms")\n',
+        'or see http://statnetproject.org/attribution')
+}
+
+.Last.lib <- function(libpath){
+  library.dynam.unload("ergmuserterms",libpath)
+}
