@@ -53,14 +53,12 @@ typedef struct ModelTermstruct {
 #define UNDO_PREVIOUS_TOGGLES(a) (a)--; while(--(a)>=0) TOGGLE(heads[(a)],tails[(a)])
 
 /****************************************************/
-/* changestat function prototypes, 
-   plus a few supporting function prototypes */
+/* changestat function prototype */
 #define CHANGESTAT_FN(a) void (a) (int ntoggles, Vertex *heads, Vertex *tails, ModelTerm *mtp, Network *nwp)
 
 /* IMPORTANT: Add your function names here */
 
 CHANGESTAT_FN(d_testme);
 CHANGESTAT_FN(d_m2star);
-CHANGESTAT_FN(d_wtdcensus);
               
 #endif
