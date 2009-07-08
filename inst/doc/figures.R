@@ -50,6 +50,6 @@ text(roots, rep(5, 8), c("6,8,3", "5", "7,6,8", "2,5,7", "4,2,3,1",
                          "2,1,8", "None", "1,5,3"), cex=2)  
 for(i in roots-.95) 
   polygon(c(i, i+1.9, i+1.9, i, i), c(6, 6, 3.2, 3.2, 5.5))
-text(9.5,7,"Outedge Lists", cex=2.5)
+text(9.5,7,"Out-edge Lists", cex=2.5)
 
 
