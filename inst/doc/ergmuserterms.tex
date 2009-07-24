@@ -140,13 +140,37 @@ before the binary trees are built.}\label{outedgefig}
 
 The binary tree routines, all written in the C language, are contained in the 
 \code{src/edgetree.c} file in the \pkg{ergmterms} package (the \pkg{ergm} package
-includes the same code).
+includes the same code).  These routines may be used to initialize or destroy
+a network object, to manipulate that object by adding or deleting edges, and to
+query that object to ascertain the presence of an edge.
+The \code{NetworkInitialize} and \code{NetworkDestroy} functions 
+are used internally by the \pkg{ergm} package to create a network object 
+and destroy it when it is no longer needed by the C code.  These two functions
+are not generally called by the user, though interested users may find it interesting
+to look at them.  Also, the definition of the \code{Network} type, in the 
+\code{src/edgetree.h} file, reveals that a network keeps updated lists of every node's
+in- and out-degree in addition to the actual edges.  A user may exploit these statistics 
+when writing code for various change statistics as described in Section \ref{Cside}.
+
 
 \section[Writing change statistics using ergmuserterms:  The R side]%
 {Writing change statistics using \pkg{ergmuserterms}:  The R side}
+\label{Rside}
 
 \section[Writing change statistics using ergmuserterms:  The C side]%
 {Writing change statistics using \pkg{ergmuserterms}:  The C side}
+\label{Cside}
+
+EdgeTreeSearch
+ToggleEdge
+AddEdgeToTrees
+DeleteEdgeFromTrees
+EdgeTreeMinimum
+EdgeTreeSuccessor
+
+
+
+
 
 \section*{Acknowledgments}
 

@@ -4,7 +4,7 @@
 #
 # This is a file of examples. You can either add all functions to the bottom
 # of this file or have them in separate files (with the extension .R).
-# There are identical from "statnet"'s perspective.
+# These are identical from "statnet"'s perspective.
 #
 # Each term must have its own InitErgmTerm function. This file contains
 # sample functions.
@@ -29,6 +29,10 @@
 #                names = "absdiff")
 #    coef.names: Vector of names for the coefficients (parameters)
 #                as they will be reported in the output.
+#        soname: This is the (text) name of the package containing the C function
+#                called d_[name].  Default is "ergm", which means that if
+#                you have code that exists as part of the (say) "ergmuserterms"
+#                package, you MUST specify (say) soname="ergmuserterms"
 #
 #    OPTIONAL LIST ITEMS:
 #        inputs: Vector of (double-precision numeric) inputs that the 
@@ -46,8 +50,6 @@
 #                at the top of the InitErgm.R file for details.  This 
 #                ParamsBeforeCov value is only necessary for compatibility 
 #                with some of the existing d_xxx changestatistic functions.
-#        soname: This is the (text) name of the package containing the C function
-#                called d_[name].  Default is "ergm"
 #    dependence: Logical variable telling whether addition of this term to
 #                the model makes the model into a dyadic dependence model.
 #                If none of the terms sets dependence==TRUE, then the model
@@ -103,8 +105,8 @@ InitErgmTerm.testme <- function(nw, arglist, ...) {
   # Construct the output list
   list(name="testme",             #name: required
        coef.names = "testme",     #coef.names: required
-       inputs = NULL,             #There are no extra inputs for this term
        soname = "ergmuserterms",  # So "ergm" knows where to find it!
+       inputs = NULL,             #There are no extra inputs for this term
        dependence = FALSE # So we don't use MCMC if not necessary
        )
 }
@@ -123,8 +125,8 @@ InitErgmTerm.m2star <- function(nw, arglist, ...) {
   # Construct the output list
   list(name="m2star",             #name: required
        coef.names = "m2star",     #coef.names: required
-       inputs = NULL,             #There are no extra inputs for this term
        soname = "ergmuserterms",  # So "ergm" knows where to find it!
+       inputs = NULL,             #There are no extra inputs for this term
        dependence = TRUE # So we need to use MCMC 
        )
 }
@@ -146,6 +148,7 @@ InitErgmTerm.absdiffme <- function(nw, arglist, ...) {
   ### Construct the list to return
   list(name="absdiffme",                                     #name: required
        coef.names = paste("absdiffme", attrname, sep="."), #coef.names: required
+       soname = "ergmuserterms",  # So "ergm" knows where to find it!
        inputs = nodecov,  # We need to include the nodal covariate for this term
        dependence = FALSE # So we don't use MCMC if not necessary
        )
