@@ -84,9 +84,9 @@ is vitally important not only for simulation but also for estimation.
 In equation (\ref{ergm}), $\vec\theta_0\in \R^p$ is a fixed parameter vector,
 $\vec g(\vec y)$ is a user-defined $p$-vector of statistics on the
 network $\vec y$ assumed to come from some set ${\cal Y}$ of networks, and 
-\beaa
+\bea\label{kappa}
 \kappa(\vec\theta) = \sum_{\vec z \in {\cal Y}} \exp\{ \vec \theta_0^\top  \vec g(\vec z) \}
-\eeaa
+\eea
 is the normalizing constant.
 
 The MCMC scheme implemented in \pkg{ergm} is called a Metropolis-Hastings
@@ -156,7 +156,75 @@ to handle models that look like Equation~\ref{ergm}.
 \section[Syntax for a call to the ergm function]{Syntax for a call to the \code{ergm} function}
 \label{syntax}
 
-This section will
+A traditional generalized linear model, as explained in the classic book by
+\citet{mccullaghnelder1989}, consists of a specification of the probabilistic dependence
+of some {\em response} variable, usually denoted $Y$, on some
+function of a linear combination of some other {\em predictor} variables,
+usually denoted $X$.  The distribution of $Y$ is generally a member of some
+known exponential family; 
+In its simplest form (ignoring any dispersion parameters), we may write the
+density or mass function of $Y$, which depends on some
+parameter vector $\vec\phi$, as
+\[
+f_Y(y) = \exp\{ \vec a(y)^\top \vec b(\vec\phi) - c(\vec\phi) \}.
+\]
+Standard exponential family theory \citep[for example, see][]{brown1986fse}
+reveals that $E(Y) = (\partial / \partial\vec\phi) c(\vec\phi)$.
+In a generalized linear model, we presume that
+\[
+E(Y) = \mbox{link}(\vec X^\top \vec\beta)
+\]
+for some ``link'' function.  Implicit in this formulation is the
+fact that $\vec X$ in considered a fixed quantity, independent of $Y$;
+indeed $\vec X$ is often referred to as the {\em independent} variable.
+(Even when $\vec X$ is considered random, we typically specify a generalized
+linear model for the {\em conditional} distribution of $Y$ given $\vec X$, so
+that $\vec X$ may be considered constant in this context.)
+
+In contrast, model~(\ref{ergm}) does not in general conform to the above 
+specifications of a generalized linear model.  While it is true that the distribution of
+the network $\vec Y$---the ``response''---is expressed in exponential family
+form, there is no way to specify some fixed $\vec X$ and some link function so that
+$E(\vec Y)= \mbox{link}(\vec X^\top \vec\beta)$.  Essentially, this is because
+an ERGM involves an inherent auto-dependence between the ``response'' and 
+any traditional notion of the ``predictors''.  
+
+In addition, there is 
+no closed-form expression for the likelihood function in an ERGM that
+can be easily evaluated.  Equation~\ref{ergm} is generally impossible 
+to use for the purposes of calculation due to the fact that
+the $\kappa$ function of~\ref{kappa}) involves an enormous number
+of summands for even simple networks.  Thus, even the estimation methods
+necessitated by maximum likelihood estimation for an ERGM differ from those
+used by a generalized linear model.  In the former case, we rely on MCMC
+sampling to generate an approximation to the likelihood, whereas in the
+latter the likelihood may be evaluated, and thus maximized, directly.
+
+Because an ERGM is not a generalized linear model,
+it is not possible to use exactly the same \proglang{R} syntax used for
+\code{glm} calls  in order to specify a call to \code{ergm}.  
+A call to \code{glm} might look like this:
+\begin{CodeChunk}
+\begin{CodeInput} 
+R> glm ( response ~ predictor1 + predictor2 + predictor3, link = binomial)
+\end{CodeInput}
+\end{CodeChunk}
+Since there is no way to define \code{predictorX} for a general ERGM,
+we instead 
+
+{\bf Remark:\ }
+For certain choices of the vector $\vec g(\vec y)$ of graph statistics, the resulting
+model~(\ref{ergm}) actually implies that all of the individual $y_{ij}$ edge indicators
+are jointly independent.  In these cases, model~(\ref{ergm}) is actually equivalent
+to a logistic regression model, which {\em is} a generalized linear model.
+See Section~3 of \citet{HunGoodHan08} for more details on these so-called
+independence models.
+{\em Is there a better reference than this?}
+
+\vspace{2ex}
+\hrule
+
+This section will:
 \begin{itemize}
 \item Argue that an ergm is not a glm because of its inherent auto-dependence.
 Reasons include:  No closed-form expression for the likelihood (hence a dependence
