@@ -67,7 +67,9 @@ URL: \url{http://www.stat.psu.edu/~dhunter/}
 \section{Introduction}
 \label{introduction}
 
-At the core of the \pkg{ergm} package \citep{ergm} is a sophisticated 
+At the core of the \pkg{ergm} package \citep{ergm} 
+for \proglang{R} \citep{r2010}
+is a sophisticated 
 Markov chain Monte Carlo engine for simulating random networks.  
 As explained by \citet{ergmjss}, simulating a Markov chain on a
 set of networks 
@@ -75,19 +77,93 @@ whose stationary distribution is given
 by the exponential-family random graph model
 \bea\label{ergm}
 P_{\vec\theta_0} (\vec Y = \vec y) = 
-\frac{ \exp\{ \vec \theta_0^t \vec g(\vec y) \} }
+\frac{ \exp\{ \vec \theta_0^\top  \vec g(\vec y) \} }
 { \kappa(\vec\theta)}
 \eea
 is vitally important not only for simulation but also for estimation.
 In equation (\ref{ergm}), $\vec\theta_0\in \R^p$ is a fixed parameter vector,
 $\vec g(\vec y)$ is a user-defined $p$-vector of statistics on the
-network $\vec y$, and 
+network $\vec y$ assumed to come from some set ${\cal Y}$ of networks, and 
 \beaa
-\kappa(\vec\theta) = \sum_{\vec z \in {\cal Y}} \exp\{ \vec \theta_0^t \vec g(\vec z) \}
+\kappa(\vec\theta) = \sum_{\vec z \in {\cal Y}} \exp\{ \vec \theta_0^\top  \vec g(\vec z) \}
 \eeaa
 is the normalizing constant.
 
-{\em Now explain change statistics and why MCMC is dependent on them}
+The MCMC scheme implemented in \pkg{ergm} is called a Metropolis-Hastings
+algorithm.  In general terms, such an algorithm proceeds from step $t$ to step $t+1$,
+from one network $\vec y^t$ to the next, by (a) selecting a candidate
+for the next network $\vec y^{t+1}$, (b) computing a {\em Hastings ratio} based on
+$\vec y^t$ and the candidate network, and (c) deciding whether $\vec y^{t+1}$
+should be set to the candidate network or, alternatively, whether to stay put 
+for another iteration and set $\vec y^{t+1}=\vec y^t$.
+The selection (a) is done so that any possible network, say $\vec x$, has probability
+$q(\vec x, \vec y^t)$ of being selected, where $q$ is some probability function known 
+to the user.  (The $q$ function can and, in general, does put probability zero on
+some values of $\vec x$, depending on the value of $\vec y^t$.)  
+The Hastings ratio (b) is equal to
+\begin{equation}\label{hastings}
+\frac{P_{\vec\theta_0} (\vec Y=\vec y^t)}{P_{\vec\theta_0} (\vec Y=\vec x)}
+\frac{q (\vec y^t, \vec x)}{q (\vec x, \vec y^t)},
+\end{equation}
+where $\vec x$ is the candidate network selected in (a).  Finally, (c) is done by selecting 
+a real number, say $u$, uniformly from the unit interval (0,1) and comparing $u$ with
+the Hastings ratio.  Then
+\[
+\vec y^{t+1} = \cases{\vec x & if $u \le \mbox{Hastings ratio}$; \cr
+\vec y^t & if $u>\mbox {Hastings ratio}$.}
+\]
+In particular, note that if the Hastings ratio is greater than one, the candidate $\vec x$ is 
+always accepted as the value for $\vec y^{t+1}$.
+
+In \pkg{ergm}, there are different possible choices of the probability distribution $q(\vec x, \vec y_{t})$
+used to select $\vec x$, but for the most part they all limit the possible choices of $\vec x$
+to those that differ from $\vec y^t$ by exactly one edge indicator;  in other words, $\vec x$
+involves a single edge toggle of $\vec y^t$.  Suppose that $\vec x$ is identical to $\vec y^t$
+in all except the $(i,j)$ entry.  Notationally, we would write $x_{ij}=1-y_{ij}^t$ but
+$\vec x_{ij}^c=\vec (y^t_{ij})^c$, where $\vec x_{ij}^c$ denotes the entire network $\vec x$ 
+{\em except for} the $(i,j)$ entry.  In this case, by substituting Equation~(\ref{ergm}) into 
+Expression~(\ref{hastings}), we see that the Hastings ratio may be simplified to
+\begin{equation}\label{hastings2}
+\frac{q (\vec y^t, \vec x)}{q (\vec x, \vec y^t)} \exp\{\pm \vec\theta_0^\top \delta (\vec y^t)_{ij} \},
+\end{equation}
+where 
+\begin{equation}\label{changestats}
+\delta (\vec y)_{ij} \stackrel{\rm def}{=} \vec g(\vec y_{ij}^+) - \vec g(\vec y_{ij}^-)
+\end{equation}
+denotes the {\em vector of change statistics}, found by subtracting the two vectors of
+$\vec g$-statistics evaluated at the networks formed by leaving all of $\vec y$ unchanged
+except for the $(i,j)$ entry, which is set to 1 in $\vec y_{ij}^+$ and 0 in $\vec y_{ij}^0$.
+The sign of the $\vec\theta_0^\top \delta (\vec y^t)_{ij}$ term
+in~(\ref{hastings2}) depends on the value
+of $y_{ij}^t$:  If $y_{ij}^t=1$, then the term gets a plus sign; otherwise it gets a minus.
+
+The key conclusion of all of the above development is that the calculation of 
+change statistic vectors is of vital importance to the running of both the simulation and
+the estimation routines in the \pkg{ergm}.   While the \pkg{ergm} package itself provides
+a large library of possible change-statistic calculation routines \citep{ergmtermsjss}, 
+individual users sometimes wish to write their own code for calculating change 
+statistics for specialized network statistics so that the \pkg{ergm} estimation routines
+can use it.  This article describes an \proglang{R} package called 
+\pkg{ergmuserterms} that is designed to make this process as straightforward as possible.
+It also explains some of the internal workings of the \pkg{ergm} package that will
+help users develop their own network change statistic code.
+
+In Section~\ref{syntax}, we discuss the unique syntax implemented in the \pkg{ergm}
+package and explain why it was necessary to extend the existing formula-based
+syntax (as used, say, by the \code{lm} and \code{glm} functions in \proglang{R})
+to handle models that look like Equation~\ref{ergm}.  
+
+\section[Syntax for a call to the ergm function]{Syntax for a call to the \code{ergm} function}
+\label{syntax}
+
+This section will
+\begin{itemize}
+\item Argue that an ergm is not a glm because of its inherent auto-dependence.
+Reasons include:  No closed-form expression for the likelihood (hence a dependence
+on MCMC); no fixed matrix of predictors
+\item Explain the syntax of an ergm formula (briefly; mostly, we can simply cite
+\citet{ergmtermsjss}).
+\end{itemize}
 
 \section[Network storage in ergm]{Network storage in \pkg{ergm}}
 
@@ -157,9 +233,14 @@ when writing code for various change statistics as described in Section \ref{Csi
 {Writing change statistics using \pkg{ergmuserterms}:  The R side}
 \label{Rside}
 
+{\em Write this!}
+
 \section[Writing change statistics using ergmuserterms:  The C side]%
 {Writing change statistics using \pkg{ergmuserterms}:  The C side}
 \label{Cside}
+
+{\em Write this!}
+
 
 EdgeTreeSearch
 ToggleEdge
