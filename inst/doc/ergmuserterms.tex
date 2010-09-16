@@ -168,7 +168,7 @@ parameter vector $\vec\phi$, as
 \[
 f_Y(y) = \exp\{ \vec a(y)^\top \vec b(\vec\phi) - c(\vec\phi) \}.
 \]
-Standard exponential family theory \citep[for example, see][]{brown1986fse}
+Standard exponential family theory \citep[e.g.,][]{brown1986fse}
 reveals that $E(Y) = (\partial / \partial\vec\phi) c(\vec\phi)$.
 In a generalized linear model, we presume that
 \[
@@ -176,9 +176,9 @@ E(Y) = \mbox{link}(\vec X^\top \vec\beta)
 \]
 for some ``link'' function.  Implicit in this formulation is the
 fact that $\vec X$ in considered a fixed quantity, independent of $Y$;
-indeed $\vec X$ is often referred to as the {\em independent} variable.
-(Even when $\vec X$ is considered random, we typically specify a generalized
-linear model for the {\em conditional} distribution of $Y$ given $\vec X$, so
+indeed, $\vec X$ is often termed the {\em independent} variable.
+(Even when $\vec X$ is considered random, one typically specifies a generalized
+linear model for the conditional distribution of $Y$ given $\vec X$, so
 that $\vec X$ may be considered constant in this context.)
 
 In contrast, model~(\ref{ergm}) does not in general conform to the above 
@@ -209,8 +209,23 @@ A call to \code{glm} might look like this:
 R> glm ( response ~ predictor1 + predictor2 + predictor3, link = binomial)
 \end{CodeInput}
 \end{CodeChunk}
-Since there is no way to define \code{predictorX} for a general ERGM,
-we instead 
+But in a general ERGM, there
+is no way to define \code{predictorX},
+nor is there a closed-form way to relate the expected value of the random 
+network to the linear combination of the network statistics.  Thus, there is
+no way to specify a link function and the standard \proglang{R} formula
+(that is, \code{response ~ predictors}) does not apply.  Nonetheless, there
+are still analogies to standard regression models, so the
+\code{ergm} function was designed to employ a modified version of the
+standard \proglang{R} formula:
+\begin{CodeChunk}
+\begin{CodeInput} 
+R> ergm ( network ~ netstat1 + netstat2 + netstat3)
+\end{CodeInput}
+\end{CodeChunk}
+Numerous examples of calls to the \code{ergm} function may be found in 
+\citet{ergmjss} and \citet{statnettutorialjss}, and a list of numerous possibilities
+for \code{netstatX} is given in \citet{ergmtermsjss}.
 
 {\bf Remark:\ }
 For certain choices of the vector $\vec g(\vec y)$ of graph statistics, the resulting
@@ -219,19 +234,9 @@ are jointly independent.  In these cases, model~(\ref{ergm}) is actually equival
 to a logistic regression model, which {\em is} a generalized linear model.
 See Section~3 of \citet{HunGoodHan08} for more details on these so-called
 independence models.
-{\em Is there a better reference than this?}
+{\em Is there a better reference than this?  Maybe it would be better to expand a bit and
+describe how ergm actually finds the MPLE for a typical ergm call.}
 
-\vspace{2ex}
-\hrule
-
-This section will:
-\begin{itemize}
-\item Argue that an ergm is not a glm because of its inherent auto-dependence.
-Reasons include:  No closed-form expression for the likelihood (hence a dependence
-on MCMC); no fixed matrix of predictors
-\item Explain the syntax of an ergm formula (briefly; mostly, we can simply cite
-\citet{ergmtermsjss}).
-\end{itemize}
 
 \section[Network storage in ergm]{Network storage in \pkg{ergm}}
 
