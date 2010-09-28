@@ -91,40 +91,40 @@ is the normalizing constant.
 
 The MCMC scheme implemented in \pkg{ergm} is called a Metropolis-Hastings
 algorithm.  In general terms, such an algorithm proceeds from step $t$ to step $t+1$,
-from one network $\vec y^t$ to the next, by (a) selecting a candidate
-for the next network $\vec y^{t+1}$, (b) computing a {\em Hastings ratio} based on
-$\vec y^t$ and the candidate network, and (c) deciding whether $\vec y^{t+1}$
+from one network $\vec y^k$ to the next, by (a) selecting a candidate
+for the next network $\vec y^{k+1}$, (b) computing a {\em Hastings ratio} based on
+$\vec y^k$ and the candidate network, and (c) deciding whether $\vec y^{k+1}$
 should be set to the candidate network or, alternatively, whether to stay put 
-for another iteration and set $\vec y^{t+1}=\vec y^t$.
+for another iteration and set $\vec y^{k+1}=\vec y^k$.
 The selection (a) is done so that any possible network, say $\vec x$, has probability
-$q(\vec x, \vec y^t)$ of being selected, where $q$ is some probability function known 
-to the user.  (The $q$ function can and, in general, does put probability zero on
-some values of $\vec x$, depending on the value of $\vec y^t$.)  
+$q(\vec x, \vec y^k)$ of being selected, where $q$ is some probability function known 
+to the user.  (The $q$ function can and, in general, does place probability zero on
+some values of $\vec x$, depending on the value of $\vec y^k$.)  
 The Hastings ratio (b) is equal to
 \begin{equation}\label{hastings}
-\frac{P_{\vec\theta_0} (\vec Y=\vec y^t)}{P_{\vec\theta_0} (\vec Y=\vec x)}
-\frac{q (\vec y^t, \vec x)}{q (\vec x, \vec y^t)},
+\frac{P_{\vec\theta_0} (\vec Y=\vec y^k)}{P_{\vec\theta_0} (\vec Y=\vec x)}
+\frac{q (\vec y^k, \vec x)}{q (\vec x, \vec y^k)},
 \end{equation}
 where $\vec x$ is the candidate network selected in (a).  Finally, (c) is done by selecting 
 a real number, say $u$, uniformly from the unit interval (0,1) and comparing $u$ with
 the Hastings ratio.  Then
 \[
-\vec y^{t+1} = \cases{\vec x & if $u \le \mbox{Hastings ratio}$; \cr
-\vec y^t & if $u>\mbox {Hastings ratio}$.}
+\vec y^{k+1} = \cases{\vec x & if $u \le \mbox{Hastings ratio}$; \cr
+\vec y^k & if $u>\mbox {Hastings ratio}$.}
 \]
 In particular, note that if the Hastings ratio is greater than one, the candidate $\vec x$ is 
-always accepted as the value for $\vec y^{t+1}$.
+always accepted as the value for $\vec y^{k+1}$.
 
 In \pkg{ergm}, there are different possible choices of the probability distribution $q(\vec x, \vec y_{t})$
 used to select $\vec x$, but for the most part they all limit the possible choices of $\vec x$
-to those that differ from $\vec y^t$ by exactly one edge indicator;  in other words, $\vec x$
-involves a single edge toggle of $\vec y^t$.  Suppose that $\vec x$ is identical to $\vec y^t$
-in all except the $(i,j)$ entry.  Notationally, we would write $x_{ij}=1-y_{ij}^t$ but
-$\vec x_{ij}^c=\vec (y^t_{ij})^c$, where $\vec x_{ij}^c$ denotes the entire network $\vec x$ 
+to those that differ from $\vec y^k$ by exactly one edge indicator;  in other words, $\vec x$
+involves a single edge toggle of $\vec y^k$.  Suppose that $\vec x$ is identical to $\vec y^k$
+in all except the $(i,j)$ entry.  Notationally, we would write $x_{ij}=1-y_{ij}^k$ but
+$\vec x_{ij}^c=\vec (y^k_{ij})^c$, where $\vec x_{ij}^c$ denotes the entire network $\vec x$ 
 {\em except for} the $(i,j)$ entry.  In this case, by substituting Equation~(\ref{ergm}) into 
 Expression~(\ref{hastings}), we see that the Hastings ratio may be simplified to
 \begin{equation}\label{hastings2}
-\frac{q (\vec y^t, \vec x)}{q (\vec x, \vec y^t)} \exp\{\pm \vec\theta_0^\top \delta (\vec y^t)_{ij} \},
+\frac{q (\vec y^k, \vec x)}{q (\vec x, \vec y^k)} \exp\{\pm \vec\theta_0^\top \delta (\vec y^k)_{ij} \},
 \end{equation}
 where 
 \begin{equation}\label{changestats}
@@ -133,17 +133,19 @@ where
 denotes the {\em vector of change statistics}, found by subtracting the two vectors of
 $\vec g$-statistics evaluated at the networks formed by leaving all of $\vec y$ unchanged
 except for the $(i,j)$ entry, which is set to 1 in $\vec y_{ij}^+$ and 0 in $\vec y_{ij}^0$.
-The sign of the $\vec\theta_0^\top \delta (\vec y^t)_{ij}$ term
+The sign of the $\vec\theta_0^\top \delta (\vec y^k)_{ij}$ term
 in~(\ref{hastings2}) depends on the value
-of $y_{ij}^t$:  If $y_{ij}^t=1$, then the term gets a plus sign; otherwise it gets a minus.
+of $y_{ij}^k$:  If $y_{ij}^k=1$, then the term gets a plus sign; otherwise it gets a minus.
 
 The key conclusion of all of the above development is that the calculation of 
 change statistic vectors is of vital importance to the running of both the simulation and
 the estimation routines in the \pkg{ergm}.   While the \pkg{ergm} package itself provides
 a large library of possible change-statistic calculation routines \citep{ergmtermsjss}, 
-individual users sometimes wish to write their own code for calculating change 
-statistics for specialized network statistics so that the \pkg{ergm} estimation routines
-can use it.  This article describes an \proglang{R} package called 
+individual users sometimes wish to estimate or simulate from a model that 
+includes specialized statistics not among those already coded in the \pkg{ergm}
+package; to do so, it is necessary for them to write code to calculate the 
+associated change statistics for the Metropolis-Hastings algorithm.
+This article describes an \proglang{R} package called 
 \pkg{ergmuserterms} that is designed to make this process as straightforward as possible.
 It also explains some of the internal workings of the \pkg{ergm} package that will
 help users develop their own network change statistic code.
@@ -151,7 +153,7 @@ help users develop their own network change statistic code.
 In Section~\ref{syntax}, we discuss the unique syntax implemented in the \pkg{ergm}
 package and explain why it was necessary to extend the existing formula-based
 syntax (as used, say, by the \code{lm} and \code{glm} functions in \proglang{R})
-to handle models that look like Equation~\ref{ergm}.  
+to handle models of the form found in Equation~(\ref{ergm}).
 
 \section[Syntax for a call to the ergm function]{Syntax for a call to the \code{ergm} function}
 \label{syntax}
@@ -177,7 +179,7 @@ E(Y) = \mbox{link}(\vec X^\top \vec\beta)
 for some ``link'' function.  Implicit in this formulation is the
 fact that $\vec X$ in considered a fixed quantity, independent of $Y$;
 indeed, $\vec X$ is often termed the {\em independent} variable.
-(Even when $\vec X$ is considered random, one typically specifies a generalized
+(Even when $\vec X$ is random, one typically specifies a generalized
 linear model for the conditional distribution of $Y$ given $\vec X$, so
 that $\vec X$ may be considered constant in this context.)
 
@@ -191,25 +193,25 @@ any traditional notion of the ``predictors''.
 
 In addition, there is 
 no closed-form expression for the likelihood function in an ERGM that
-can be easily evaluated.  Equation~\ref{ergm} is generally impossible 
+can be easily evaluated.  Equation~(\ref{ergm}) is generally impossible 
 to use for the purposes of calculation due to the fact that
-the $\kappa$ function of~\ref{kappa}) involves an enormous number
+the $\kappa$ function of Equation~(\ref{kappa}) involves an enormous number
 of summands for even simple networks.  Thus, even the estimation methods
 necessitated by maximum likelihood estimation for an ERGM differ from those
 used by a generalized linear model.  In the former case, we rely on MCMC
 sampling to generate an approximation to the likelihood, whereas in the
 latter the likelihood may be evaluated, and thus maximized, directly.
 
-Because an ERGM is not a generalized linear model,
-it is not possible to use exactly the same \proglang{R} syntax used for
-\code{glm} calls  in order to specify a call to \code{ergm}.  
-A call to \code{glm} might look like this:
+%Because an ERGM is not a generalized linear model,
+%it is not possible to use exactly the same \proglang{R} syntax used for
+%\code{glm} calls  in order to specify a call to \code{ergm}.  
+Let us consider a typical call to the \code{glm} function in \proglang{R}:
 \begin{CodeChunk}
 \begin{CodeInput} 
 R> glm ( response ~ predictor1 + predictor2 + predictor3, link = binomial)
 \end{CodeInput}
 \end{CodeChunk}
-But in a general ERGM, there
+In a general ERGM, there
 is no way to define \code{predictorX},
 nor is there a closed-form way to relate the expected value of the random 
 network to the linear combination of the network statistics.  Thus, there is
@@ -240,6 +242,9 @@ describe how ergm actually finds the MPLE for a typical ergm call.}
 
 \section[Network storage in ergm]{Network storage in \pkg{ergm}}
 
+Because an understanding of the internal storage of a network in the
+\pkg{ergm} package will aid the writing of code for a change
+statistic, we describe this storage in some detail here.
 A network with $n$ nodes is
 internally represented in \pkg{ergm} as a set of $2n$ edgelists, 
 $n$ for ``in-edges'' and $n$ for ``out-edges''.  If the directed edge $(3,5)$ exists in the network,
@@ -250,7 +255,8 @@ redundancy, and maintaining these two sets of edgelists entails both a storage a
 cost.  However, in situations where an algorithm must be able to look up both all in-edges and all
 out-edges of a node, this scheme is very efficient.  
 In the case of an undirected network, the designations of ``head'' and ``tail'' are arbitrary, and we
-define the smaller-numbered node as the head and the larger-numered node as the tail.  
+define the smaller-numbered node as the head and the larger-numbered 
+node as the tail.  
 
 Storage of each node's in-edge list and out-edge list is implemented using a standard
 binary tree structure
@@ -260,7 +266,7 @@ particular node has.  In a binary tree such as those shown in Figure \ref{outedg
 each parent node has two potential children, with the left child's value always less than the
 parent's and the right child's value always greater.  To avoid the worst-case performance
 that can result from a list of values being passed in strictly increasing or decreasing order,
-each node's edgelist should be randomly permuted before it is stored as a tree.
+each node's edgelist is randomly permuted before it is stored as a tree.
 
 \begin{figure}[htb]
 \vspace{3ex}
@@ -276,7 +282,7 @@ $\displaystyle{\pmatrix{
  }\qquad\qquad\vtop{\vskip-15ex \hbox{\includegraphics[height=2in, width=2in]{net8nodes.pdf}}}
 $
 \caption{The adjacency matrix (on left) and a corresponding graphical representation
-of a directed 8-node network.  The rows of the adjacency matrix become
+of a directed 8-node network.  The rows of the adjacency matrix define
 the out-edge lists of Figure \ref{outedgefig}.}\label{8nodeexample}
 \end{figure}
 
