@@ -63,7 +63,7 @@ For complete citation information, use\cr
   to the core suite.
 
   There are three example terms:
-    \item{\code{testme}}{\emph{A clone of Edges}. 
+    \code{testme}{\emph{A clone of Edges}. 
     It is included for purposes of an example.
     This option adds one graph statistic
     equal to the number of edges in the graph.  For undirected
@@ -71,14 +71,14 @@ For complete citation information, use\cr
     digraphs, \code{edges} is isomorphic to both \code{ostar(1)}
     and \code{istar(1)}.  }
 
-    \item{\code{m2star}}{\emph{Mixed 2-stars, aka 2-paths:}
+    \code{m2star}{\emph{Mixed 2-stars, aka 2-paths:}
     This option can only be 
     specified with a digraph; for undirected graphs see \code{kstar(2)}. This 
     option adds one statistic to the model, equal to the 
     number of mixed-2-stars in the graph, defined as a 
     pair of edges \eqn{\{(i->j), (j->k)\}.} }
   
-    \item{\code{absdiffme(attrname)}}{\emph{A clone of Absolute difference:} 
+    \code{absdiffme(attrname)}{\emph{A clone of Absolute difference:} 
     It is included for purposes of an example.
     \code{attrname} argument is a character string giving the name of a
     quantitative attribute in the network's vertex attribute list. This term
@@ -87,29 +87,35 @@ For complete citation information, use\cr
 
    To add a new term you need to (all file references are relative to the 
    package directory).:
-     \item{1}{Download the source version of this package. For example,\\
+     1.  Download the source version of this package. For example,\\
              \code{download.packages("ergmuserterms",destdir=".",type="source", contriburl="http://csde.washington.edu/statnet")}\\
       where \code{destdir} is the directory to save the source
-      (e.g., \code{ergmuserterms_2.0.tar.gz}) in.}
-     \item{2}{Unpack the source into a directory
+      (e.g., \code{ergmuserterms_2.0.tar.gz}) in.
+
+     2.  Unpack the source into a directory
               (e.g., on LINUX or the Mac 
-               \code{tar -vzxf ergmuserterms_2.0.tar.gz}).}
-     \item{3}{Optionally, rename the package name from 
+               \code{tar -vzxf ergmuserterms_2.0.tar.gz}).
+
+     3.  Optionally, rename the package name from 
               \code{ergmuserterms} to some something
         more evocative of its use (e.g., \code{myergm}). 
         This can be done using a global change to the files in the 
         directory. Optionally, edit the \code{DESCRIPTION} file to reflect the 
-        use of the package.}
-     \item{4}{Edit \code{R/InitErgmTerm.users.R} to add 
-         \R \code{InitErgmTerm} functions for the new terms.}
-     \item{5}{Edit \code{src/changestats.c} to add \code{C}
+        use of the package.
+
+     4.  Edit \code{R/InitErgmTerm.users.R} to add 
+         \R \code{InitErgmTerm} functions for the new terms.
+
+     5.  Edit \code{src/changestats.c} to add \code{C}
          functions (like the examples in the file) to compute the 
-         new change statistics.}
-     \item{6}{Compile the package using the usual \R
+         new change statistics.
+
+     6.  Compile the package using the usual \R
          tools (e.g., \code{R CMD build myergm} and
-                      \code{R CMD INSTALL myergm}).}
-     \item{7}{Run it! It depends on \pkg{ergm} and \pkg{network}, of course.
-            See the example below.}
+                      \code{R CMD INSTALL myergm}).
+
+     7.  Run it! It depends on \pkg{ergm} and \pkg{network}, of course.
+            See the example below.
 }
 \author{
 Mark S. Handcock \email{handcock@stat.washington.edu},\cr
@@ -121,7 +127,7 @@ Martina Morris \email{morrism@u.washington.edu}
 Maintainer: Mark S. Handcock \email{handcock@stat.washington.edu}
 }
 \references{
-Admiraal R, Handcock MS (2007).
+Admiraal R, Handcock MS (2007)
  {\pkg{networksis}: Simulate bipartite graphs with fixed
   marginals through sequential importance sampling}.
  Statnet Project, Seattle, WA.
@@ -130,70 +136,70 @@ Admiraal R, Handcock MS (2007).
 Bender-deMoll S, Morris M, Moody J (2008).
  {Prototype Packages for Managing and Animating Longitudinal
   Network Data: \pkg{dynamicnetwork} and \pkg{rSoNIA}.}
- {Journal of Statistical Software}, \textbf{24}(7).
+ \emph{Journal of Statistical Software}, \bold{24}(7).
  \url{http://www.jstatsoft.org/v24/i07/}.
 
-Butts CT (2006).
+Butts CT (2006)
  {\pkg{netperm}: Permutation Models for Relational Data}.
  Version 0.2, \url{http://erzuli.ss.uci.edu/R.stuff}.
 
-Butts CT (2007).
+Butts CT (2007)
  {\pkg{sna}: Tools for Social Network Analysis}.
  Version 1.5, \url{http://erzuli.ss.uci.edu/R.stuff}.
 
-Butts CT (2008).
+Butts CT (2008)
  {\pkg{network}: {A} Package for Managing Relational Data in \R.}
- {Journal of Statistical Software}, \textbf{24}(2).
+ \emph{Journal of Statistical Software}, \bold{24}(2).
  \url{http://www.jstatsoft.org/v24/i02/}.
 
-Butts CT, with help~from David~Hunter, Handcock MS (2007).
+Butts CT, with help from Hunter DR, Handcock MS (2007)
  {\pkg{network}: Classes for Relational Data}.
  Version 1.2, \url{http://erzuli.ss.uci.edu/R.stuff}.
 
-Goodreau SM, Handcock MS, Hunter DR, Butts CT, Morris M (2008a).
+Goodreau SM, Handcock MS, Hunter DR, Butts CT, Morris M (2008)
  {A \pkg{statnet} Tutorial.}
- {Journal of Statistical Software}, \textbf{24}(8).
+ \emph{Journal of Statistical Software}, \bold{24}(8).
  \url{http://www.jstatsoft.org/v24/i08/}.
 
-Goodreau SM, Kitts J, Morris M (2008{{b}}).
+Goodreau SM, Kitts J, Morris M (2009)
  {Birds of a Feather, or Friend of a Friend? Using Exponential
   Random Graph Models to Investigate Adolescent Social Networks.}
- {Demography}, \textbf{45}, in press.
+ \emph{Demography}, \bold{46}, 103--125.
 
-Handcock MS (2003{{b}}).
+Handcock MS (2003{{b}})
  {\pkg{degreenet}: Models for Skewed Count Distributions Relevant
   to Networks}.
  Statnet Project, Seattle, WA.
  Version 1.0, \url{http://statnetproject.org}.
 
-Handcock MS, Hunter DR, Butts CT, Goodreau SM, Morris M (2003{{a}}).
+Handcock MS, Hunter DR, Butts CT, Goodreau SM, Morris M (2003{{a}})
  {\pkg{ergm}: {A} Package to Fit, Simulate and Diagnose
   Exponential-Family Models for Networks}.
  Statnet Project, Seattle, WA.
  Version 2, \url{http://statnetproject.org}.
 
-Handcock MS, Hunter DR, Butts CT, Goodreau SM, Morris M (2003{{b}}).
+Handcock MS, Hunter DR, Butts CT, Goodreau SM, Morris M (2003{{b}})
  {\pkg{statnet}: Software Tools for the Statistical Modeling of
   Network Data}.
  Statnet Project, Seattle, WA.
  Version 2, \url{http://statnetproject.org}.
 
-Hunter DR, Handcock MS, Butts CT, Goodreau SM, Morris M (2008{{b}}).
+Hunter DR, Handcock MS, Butts CT, Goodreau SM, Morris M (2008{{b}})
  {\pkg{ergm}: {A} Package to Fit, Simulate and Diagnose
   Exponential-Family Models for Networks.}
- {Journal of Statistical Software}, \textbf{24}(3).
+ \emph{Journal of Statistical Software}, \bold{24}(3).
  \url{http://www.jstatsoft.org/v24/i03/}.
 
-Krivitsky PN, Handcock MS (2007).
+Krivitsky PN, Handcock MS (2007)
  {\pkg{latentnet}: Latent position and cluster models for
   statistical networks}.
  Seattle, WA.
  Version 2, \url{http://statnetproject.org}.
 
-Morris M, Handcock MS, Hunter DR (2008).
+Morris M, Handcock MS, Hunter DR (2008)
  {Specification of Exponential-Family Random Graph Models:
   Terms and Computational Aspects.}
- {Journal of Statistical Software}, \textbf{24}(4).
+ \emph{Journal of Statistical Software}, \bold{24}(4).
  \url{http://www.jstatsoft.org/v24/i04/}.
 }
 \seealso{statnet, network, ergm, ergm-terms}

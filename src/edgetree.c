@@ -1,29 +1,5 @@
 #include "edgetree.h"
 
-/*######################################################################
-#
-# copyright (c) 2003, Mark S. Handcock, University of Washington
-#                     David R. Hunter, Penn State University
-#                     Carter T. Butts, University of California - Irvine
-#                     Martina Morris, University of Washington
-# 
-# For license information see http://statnetproject.org/license
-#
-# We have invested a lot of time and effort in creating 'statnet',
-# for use by other researchers. We require that the attributions
-# in the software are retained (even if only pieces of it are used),
-# and that there is attribution when the package is loaded (e.g., via
-# "library" or "require"). This is to stop
-# "rebadging" of the software. 
-#
-# Cite us!
-#
-# To cite see http://statnetproject.org/cite
-#
-# .First.lib is run when the package is loaded.
-#
-###################################################################### */
-
 /*******************
  Network NetworkInitialize
 
@@ -32,37 +8,26 @@
  have all its values set to zero
 *******************/
 Network NetworkInitialize(Vertex *heads, Vertex *tails, Edge nedges, 
-        Edge maxedges,
 			  Vertex nnodes, int directed_flag, Vertex bipartite,
 			  int lasttoggle_flag) {
-  Edge i, j;
-  Vertex h, t;
   Network nw;
 
   nw.next_inedge = nw.next_outedge = (Edge)nnodes+1;
-  nw.outdegree = (Vertex *) malloc(sizeof(Vertex) * (nnodes+1));
-  nw.indegree  = (Vertex *) malloc(sizeof(Vertex) * (nnodes+1));
-  nw.maxedges = maxedges+nnodes+2; /* Maybe larger than needed? */
-  nw.inedges = (TreeNode *) malloc(sizeof(TreeNode) * nw.maxedges);
-  nw.outedges = (TreeNode *) malloc(sizeof(TreeNode) * nw.maxedges);
+  /* Calloc will zero the allocated memory for us, probably a lot
+     faster. */
+  nw.outdegree = (Vertex *) calloc((nnodes+1),sizeof(Vertex));
+  nw.indegree  = (Vertex *) calloc((nnodes+1),sizeof(Vertex));
+  nw.maxedges = MAX(nedges,1)+nnodes+2; /* Maybe larger than needed? */
+  nw.inedges = (TreeNode *) calloc(nw.maxedges,sizeof(TreeNode));
+  nw.outedges = (TreeNode *) calloc(nw.maxedges,sizeof(TreeNode));
+
+  GetRNGstate();  /* R function enabling uniform RNG */
 
   if(lasttoggle_flag){
     nw.duration_info.MCMCtimer=0;
-    i = directed_flag? nnodes*(nnodes-1) : (nnodes*(nnodes-1))/2;
-    nw.duration_info.lasttoggle = (int *) calloc(i,sizeof(int));
+    nw.duration_info.lasttoggle = (int *) calloc(directed_flag? nnodes*(nnodes-1) : (nnodes*(nnodes-1))/2, sizeof(int));
   }
   else nw.duration_info.lasttoggle = NULL;
-
-  for (i=0; i<=nnodes; i++) {
-    nw.inedges[i].value = nw.outedges[i].value = 0;
-    nw.inedges[i].parent = nw.outedges[i].parent = 0;
-    nw.inedges[i].left = nw.outedges[i].left = 0;
-    nw.inedges[i].right = nw.outedges[i].right = 0;
-    nw.indegree[i] = nw.outdegree[i] = 0;
-  }
-  
-  for (; i<nw.maxedges; i++)
-    nw.inedges[i].value = nw.outedges[i].value = 0;
 
   /*Configure a Network*/
   nw.nnodes = nnodes;
@@ -70,79 +35,38 @@ Network NetworkInitialize(Vertex *heads, Vertex *tails, Edge nedges,
   nw.directed_flag=directed_flag;
   nw.bipartite=bipartite;
 
-  for(i = nedges; i > 0; i--) {
-    j = i * unif_rand();  /* shuffle to avoid worst-case performance */
-    h = (Vertex)heads[j];
-    t = (Vertex)tails[j];
-    heads[j] = heads[i-1];
-    tails[j] = tails[i-1];
-    heads[i-1] = h;
-    tails[i-1] = t;
+  ShuffleEdges(heads,tails,nedges); /* shuffle to avoid worst-case performance */
+
+  for(Edge i = 0; i < nedges; i++) {
+    Vertex h=heads[i], t=tails[i];
     if (!directed_flag && h > t) 
       AddEdgeToTrees(t,h,&nw); /* Undir edges always have head < tail */ 
     else 
       AddEdgeToTrees(h,t,&nw);
-  }  
+  }
+  PutRNGstate();
   return nw;
 }
 
 /*Takes vectors of doubles for edges; used only when constructing from inputparams. */
-/*To do:  Make this function call NetworkInitialize to avoid repeated code */
 Network NetworkInitializeD(double *heads, double *tails, Edge nedges,
-        Edge maxedges,
 			  Vertex nnodes, int directed_flag, Vertex bipartite,
 			  int lasttoggle_flag) {
-  Edge i, j;
-  Vertex h, t;
-  Network nw;
 
-  nw.next_inedge = nw.next_outedge = (Edge)nnodes+1;
-  nw.outdegree = (Vertex *) malloc(sizeof(Vertex) * (nnodes+1));
-  nw.indegree  = (Vertex *) malloc(sizeof(Vertex) * (nnodes+1));
-  nw.maxedges = maxedges+nnodes+2; /* Maybe larger than needed? */
-  nw.inedges = (TreeNode *) malloc(sizeof(TreeNode) * nw.maxedges);
-  nw.outedges = (TreeNode *) malloc(sizeof(TreeNode) * nw.maxedges);
-
-  if(lasttoggle_flag){
-    nw.duration_info.MCMCtimer=0;
-    i = directed_flag? nnodes*(nnodes-1) : (nnodes*(nnodes-1))/2;
-    nw.duration_info.lasttoggle = (int *) calloc(i,sizeof(int));
-  }
-  else nw.duration_info.lasttoggle = NULL;
-
-  for (i=0; i<=nnodes; i++) {
-    nw.inedges[i].value = nw.outedges[i].value = 0;
-    nw.inedges[i].parent = nw.outedges[i].parent = 0;
-    nw.inedges[i].left = nw.outedges[i].left = 0;
-    nw.inedges[i].right = nw.outedges[i].right = 0;
-    nw.indegree[i] = nw.outdegree[i] = 0;
-  }
+  Vertex *iheads=(Vertex*)malloc(sizeof(Vertex)*nedges);
+  Vertex *itails=(Vertex*)malloc(sizeof(Vertex)*nedges);
   
-  for (; i<maxedges; i++)
-    nw.inedges[i].value = nw.outedges[i].value = 0;
+  for(Edge i=0; i<nedges; i++){
+    iheads[i]=heads[i];
+    itails[i]=tails[i];
+  }
 
-  /*Configure a Network*/
-  nw.nnodes = nnodes;
-  nw.nedges = 0; /* Edges will be added one by one */
-  nw.directed_flag=directed_flag;
-  nw.bipartite=bipartite;
+  Network nw=NetworkInitialize(iheads,itails,nedges,nnodes,directed_flag,bipartite,lasttoggle_flag);
 
-  for(i = nedges; i > 0; i--) {
-    j = i * unif_rand();  /* shuffle to avoid worst-case performance */
-    h = (Vertex)heads[j];
-    t = (Vertex)tails[j];
-    heads[j] = heads[i-1];
-    tails[j] = tails[i-1];
-    heads[i-1] = h;
-    tails[i-1] = t;
-    if (!directed_flag && h > t) 
-      AddEdgeToTrees(t,h,&nw); /* Undir edges always have head < tail */ 
-    else 
-      AddEdgeToTrees(h,t,&nw);
-  }  
+  free(iheads);
+  free(itails);
   return nw;
 }
-
 
 /*******************
  void NetworkDestroy
@@ -156,6 +80,41 @@ void NetworkDestroy(Network *nwp) {
     free (nwp->duration_info.lasttoggle);
     nwp->duration_info.lasttoggle=NULL;
   }
+}
+
+/******************
+ Network NetworkCopy
+*****************/
+Network *NetworkCopy(Network *dest, Network *src){
+  Vertex nnodes = dest->nnodes = src->nnodes;
+  dest->next_inedge = src->next_inedge;
+  dest->next_outedge = src->next_outedge;
+
+  dest->outdegree = (Vertex *) malloc((nnodes+1)*sizeof(Vertex));
+  memcpy(dest->outdegree, src->outdegree, (nnodes+1)*sizeof(Vertex));
+  dest->indegree = (Vertex *) malloc((nnodes+1)*sizeof(Vertex));
+  memcpy(dest->indegree, src->indegree, (nnodes+1)*sizeof(Vertex));
+
+  Vertex maxedges = dest->maxedges = src->maxedges;
+
+  dest->inedges = (TreeNode *) malloc(maxedges*sizeof(TreeNode));
+  memcpy(dest->inedges, src->inedges, maxedges*sizeof(TreeNode));
+  dest->outedges = (TreeNode *) malloc(maxedges*sizeof(TreeNode));
+  memcpy(dest->outedges, src->outedges, maxedges*sizeof(TreeNode));
+
+  int directed_flag = dest->directed_flag = src->directed_flag;
+
+  if(src->duration_info.lasttoggle){
+    dest->duration_info.MCMCtimer=src->duration_info.MCMCtimer;
+    dest->duration_info.lasttoggle = (int *) calloc(directed_flag? nnodes*(nnodes-1) : (nnodes*(nnodes-1))/2, sizeof(int));
+    memcpy(dest->duration_info.lasttoggle, src->duration_info.lasttoggle,(directed_flag? nnodes*(nnodes-1) : (nnodes*(nnodes-1))/2) * sizeof(int));
+  }
+  else dest->duration_info.lasttoggle = NULL;
+
+  dest->nedges = src->nedges;
+  dest->bipartite = src->bipartite;
+
+  return dest;
 }
 
 /*****************
@@ -241,8 +200,7 @@ int ToggleEdge (Vertex head, Vertex tail, Network *nwp)
  Same as ToggleEdge, but this time with the additional
  step of updating the matrix of 'lasttoggle' times
  *****************/
-int ToggleEdgeWithTimestamp (Vertex head, Vertex tail, Network *nwp) 
-{
+int ToggleEdgeWithTimestamp(Vertex head, Vertex tail, Network *nwp){
   Edge k;
 
   if (!(nwp->directed_flag) && head > tail) {
@@ -266,6 +224,50 @@ int ToggleEdgeWithTimestamp (Vertex head, Vertex tail, Network *nwp)
     return 1 - DeleteEdgeFromTrees(head,tail,nwp);
 }
 
+/*****************
+ long int ElapsedTime
+
+ Return time since given (head,tail) was last toggled using
+ ToggleEdgeWithTimestamp function
+*****************/
+int ElapsedTime(Vertex head, Vertex tail, Network *nwp){
+  Edge k;
+  if (!(nwp->directed_flag) && head > tail) {
+    Vertex temp;
+    temp = head; /*  Make sure head<tail always for undirected edges */
+    head = tail;
+    tail = temp;
+  }
+
+  if(nwp->duration_info.lasttoggle){ /* Return 0 if no duration info. */
+    if (nwp->directed_flag) 
+      k = (tail-1)*(nwp->nnodes-1) + head - ((head>tail) ? 1:0) - 1; 
+    else
+      k = (tail-1)*(tail-2)/2 + head - 1;    
+    return nwp->duration_info.MCMCtimer - nwp->duration_info.lasttoggle[k];
+  }
+  else return 0; 
+  /* Should maybe return an error code of some sort, since 0 elapsed time
+     is valid output. Need to think about it. */
+}
+
+/*****************
+ void TouchEdge
+
+ Named after the UNIX "touch" command.
+ Set an edge's time-stamp to the current MCMC time.
+ *****************/
+
+void TouchEdge(Vertex head, Vertex tail, Network *nwp){
+  unsigned int k;
+  if(nwp->duration_info.lasttoggle){ /* Skip timestamps if no duration info. */
+    if (nwp->directed_flag) 
+      k = (tail-1)*(nwp->nnodes-1) + head - ((head>tail) ? 1:0) - 1; 
+    else
+      k = (tail-1)*(tail-2)/2 + head - 1;    
+    nwp->duration_info.lasttoggle[k] = nwp->duration_info.MCMCtimer;
+  }
+}
 
 /*****************
  Edge AddEdgeToTrees
@@ -291,13 +293,13 @@ int AddEdgeToTrees(Vertex head, Vertex tail, Network *nwp){
 }
 
 /*****************
- Edge AddHalfedgeToTree:  Only called by AddEdgeToTrees
+ void AddHalfedgeToTree:  Only called by AddEdgeToTrees
 *****************/
-void AddHalfedgeToTree (Vertex a, Vertex b, TreeNode *edges, Edge next_edge) {
+void AddHalfedgeToTree (Vertex a, Vertex b, TreeNode *edges, Edge next_edge){
   TreeNode *eptr = edges+a, *newnode;
   Edge e;
 
-  if (eptr->value==0) { /* This is the first edge for this vertex. */
+  if (eptr->value==0) { /* This is the first edge for vertex a. */
     eptr->value=b;
     return;
   }
@@ -327,13 +329,13 @@ void UpdateNextedge (TreeNode *edges, Edge *nextedge, Network *nwp) {
     if (edges[*nextedge].value==0) return;
   }
   /* There are no "holes" left, so this network overflows mem allocation */
-  Rprintf("Allocation of %d edges exceeded... ", nwp->maxedges);
   nwp->maxedges *= mult;
   nwp->inedges = (TreeNode *) realloc(nwp->inedges, 
                                       sizeof(TreeNode) * nwp->maxedges);
+  memset(nwp->inedges+*nextedge,0,sizeof(TreeNode) * (nwp->maxedges-*nextedge));
   nwp->outedges = (TreeNode *) realloc(nwp->outedges, 
                                        sizeof(TreeNode) * nwp->maxedges);
-  Rprintf("Multipled allocation by %d now.\n", mult);
+  memset(nwp->outedges+*nextedge,0,sizeof(TreeNode) * (nwp->maxedges-*nextedge));
 }
 
 /*****************
@@ -543,3 +545,14 @@ Edge EdgeTree2EdgeList(Vertex *heads, Vertex *tails, Network *nwp, Edge nmax){
   return nextedge;
 }
 
+void ShuffleEdges(Vertex *heads, Vertex *tails, Edge nedges){
+  for(Edge i = nedges; i > 0; i--) {
+    Edge j = (double) i * unif_rand();  /* shuffle to avoid worst-case performance */
+    Vertex h = heads[j];
+    Vertex t = tails[j];
+    heads[j] = heads[i-1];
+    tails[j] = tails[i-1];
+    heads[i-1] = h;
+    tails[i-1] = t;
+  }
+}

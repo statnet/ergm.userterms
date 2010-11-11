@@ -4,7 +4,9 @@
 #include "edgetree.h"
 
 typedef struct ModelTermstruct {
-	void (*func)(int, Vertex*, Vertex*, struct ModelTermstruct*, Network*);
+	void (*d_func)(Edge, Vertex*, Vertex*, struct ModelTermstruct*, Network*);
+  void (*s_func)(struct ModelTermstruct*, Network*);
+  void (*t_func)(struct ModelTermstruct*, Network*);
 	double *attrib; /* Ptr to vector of covariates (if necessary; generally unused) */
 	int nstats;   /* Number of change statistics to be returned */
 	double *dstats; /* ptr to change statistics returned */
@@ -55,20 +57,20 @@ typedef struct ModelTermstruct {
 #define N_EDGES (nwp->nedges) /* Total number of edges in the network currently */
 
 /* 0 if network is not bipartite, otherwise number of first node of second type */
-#define BIPARTITE (nwp->bipartite) 
+#define BIPARTITE (nwp->bipartite)
 
 /* macros used for internal purposes:  assigning the next in- and out-edge when
    needed */
-#define NEXT_INEDGE_NUM (nwp->next_inedge) 
+#define NEXT_INEDGE_NUM (nwp->next_inedge)
 #define NEXT_OUTEDGE_NUM (nwp->next_outedge)
 
 /* Vector of change statistics to be modified by the function*/
 #define CHANGE_STAT (mtp->dstats)
 /* Number of change statistics required by the current term */
-#define N_CHANGE_STATS (mtp->nstats) 
+#define N_CHANGE_STATS (mtp->nstats)
 
 /* Vector of values passed via "inputs" from R */
-#define INPUT_PARAM (mtp->inputparams) 
+#define INPUT_PARAM (mtp->inputparams)
 #define N_INPUT_PARAMS (mtp->ninputparams) /* Number of inputs passed */
 
 /* macro to set all changestats to zero at start of function */
@@ -85,7 +87,7 @@ typedef struct ModelTermstruct {
 #define CHANGESTAT_FN(a) void (a) (int ntoggles, Vertex *heads, Vertex *tails, ModelTerm *mtp, Network *nwp)
 
 /* Not often used */
-#define INPUT_ATTRIB (mtp->attrib) 
+#define INPUT_ATTRIB (mtp->attrib)
 
 
 

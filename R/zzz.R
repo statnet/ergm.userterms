@@ -16,7 +16,7 @@
     cat('Type help(package="ergmuserterms") to get started.\n\n')
     cat('Based on "statnet" project software (http://statnetproject.org).\n',
         'For license and citation information type citation("ergmuserterms")\n',
-        'or see http://statnetproject.org/attribution')
+        'or see http://statnetproject.org/attribution\n')
 }
 
 .Last.lib <- function(libpath){
