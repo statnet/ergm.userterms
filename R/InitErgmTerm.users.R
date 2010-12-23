@@ -1,157 +1,169 @@
-#################################################################
+######################################################################
 #
 # !! USERS: READ THIS FIRST!!
 #
-# This is a file of examples. You can either add all functions to the bottom
-# of this file or have them in separate files (with the extension .R).
-# These are identical from "statnet"'s perspective.
+# Each term must have its own InitErgmTerm function. You can either
+# add all functions to the bottom of this file or have them in 
+# separate files (with the extension .R).
 #
-# Each term must have its own InitErgmTerm function. This file contains
-# sample functions.
-#################################################################
+# This file contains 
+#    - a description of the input and output parameters to each
+#      InitErgmTerm function
+#    - a description of the input parameters that the C changestats
+#      function will receive
+#    - sample InitErgmTerm functions. These are identical from 
+#      "statnet"'s perspective.
 #
-# InitErgmTerm functions
+######################################################################
+
+
+#  ------------------------------------------------------------------ 
+#   Description of the input and output parameters of the  
+#   InitErgmTerm.xxx function, where xxx is the name of your term
+#  ------------------------------------------------------------------ 
 #
-# INPUT:
-# Each InitErgmTerm function takes two arguments, nw and arglist,
-# which are automatically supplied by ergm.getmodel.  There may be
-# other arguments passed by ergm.getmodel, so each InitErgmTerm
-# function must also include the ... argument in its list.
+#  INPUTS:
+#  Each InitErgmTerm function takes three arguments:
+#	  		nw: The network of interest
+#      arglist: The list of arguments passed to the term xxx
+#         ... : There may be other arguments passed by 
+#               ergm.getmodel, so each InitErgmTerm function 
+#               must include the ... argument
+#  These inputs are automatically supplied by ergm.getmodel.
 #
-# OUTPUT:
-# Each InitErgmTerm function should return a list.  
-#    REQUIRED LIST ITEMS:
-#          name: Name of the C function that produces the change
-#                statistics.  (Note:  The name will have "d_" 
-#                prepended.  For example, the C function for the
-#                absdiff change statistics is called "d_absdiff"
-#                even though InitErgmTerm.absdiff only returns
-#                names = "absdiff")
+#  OUTPUTS:
+#  Each InitErgmTerm function should return a list.  
+#     REQUIRED LIST ITEMS:
+#          name: This names the C changestats function for term xxx, 
+#                but does so by excluding the d_ prefix. The 
+#                changestats function is named d_xxxy and 'name' is
+#                consequently "xxxy". For example, the b1starmix
+#                term has 2 changestats functions based on
+#                whether the homophily argument is set. These are
+#                d_b1starmix and d_b1starmixhomophily. The 'name' 
+#                returned by InitErgmTerm.b1starmix is then one of 
+#                "b1starmix" or "b1starmixhomophily" as appropriate.
 #    coef.names: Vector of names for the coefficients (parameters)
 #                as they will be reported in the output.
-#       pkgname: This is the (text) name of the package containing the C function
-#                called d_[name].  Default is "ergm", which means that if
-#                you have code that exists as part of the (say) "ergmuserterms"
-#                package, you MUST specify (say) pkgname="ergmuserterms"
+#       pkgname: This names the package containing the C changestats
+#                function d_[name]. The default is "ergm", which means
+#                that if you have code that exists as part of the 
+#                (say) "ergm.userterms" package, you MUST specify 
+#                pkgname="ergm.userterms"
 #
 #    OPTIONAL LIST ITEMS:
 #        inputs: Vector of (double-precision numeric) inputs that the 
-#                changestat function called d_<name> will require
-#                (see WHAT THE C CHANGESTAT FUNCTION RECEIVES below).
-#                The default is NULL; no inputs are required.  But it MUST
-#                be a vector!  Thus, if some of the inputs are, say, matrices,
-#                they must be "flattened" to vectors; if some are categorical
-#                character-valued variables, they must be converted to numbers.
-#                Optionally, the inputs vector may have an attribute named 
-#                "ParamsBeforeCov", which is the
-#                number that used to be the old Element 1 (number of input
-#                parameters BEFORE the beginning of the covariate vector)                                                         
-#                when using the old InitErgm specification; see the comment
-#                at the top of the InitErgm.R file for details.  This 
-#                ParamsBeforeCov value is only necessary for compatibility 
-#                with some of the existing d_xxx changestatistic functions.
+#                changestat function called d_'name' may require.
+#                The default is NULL; no inputs are required.  But it
+#                MUST be a vector!  Thus, if some of the inputs are,  
+#                say, matrices, they must be "flattened" to vectors; if 
+#                some are categorical character-valued variables, they
+#                must be converted to numbers. Optionally, the inputs 
+#                vector may have an attribute named "ParamsBeforeCov",
+#                which is the number of input parameters preceding the 
+#                covariate vector in 'inputs'.  This is necessary for 
+#                compatibility with some of the existing d_xxx changestats 
+#                functions in ergm, but is not necessary in general.
 #    dependence: Logical variable telling whether addition of this term to
 #                the model makes the model into a dyadic dependence model.
 #                If none of the terms sets dependence==TRUE, then the model
 #                is assumed to be a dyadic independence model, which means
 #                that the pseudolikelihood estimate coincides with the
-#                maximum likelihood estimate.  Default value:  TRUE
+#                maximum likelihood estimate.  The default value is TRUE.
 #  emptynwstats: Vector of values (if nonzero) for the statistics evaluated
 #                on the empty network.  If all are zero for this term, this
-#                argument may be omitted.  Example:  If the degree0 term is
-#                among the statistics, this argument is necessary because
-#                degree0 = number of nodes for the empty network.
-#        params: For curved exponential family model terms only: This argument 
-#                is a list:  Each item in the list should be named with the
-#                corresponding parameter name (one or more of these will
-#                probably coincide with the coef.names used when
-#                initialfit=TRUE; the initial values of such parameter values
-#                will be set by MPLE, so their values in params are ignored.)
-#                Any parameter not having its initial value set by MPLE
-#                should be given its initial value in this params list.
-#           map: For curved exponential family model terms only: A function 
-#                that gives the map from theta (the canonical
-#                parameters associated with the statistics for this term)
-#                to eta (the corresponding curved parameters).  The length
-#                of eta is the same as the length of the params list above.
-#                This function takes two args:  theta and length(eta).
-#      gradient: For curved exponential family model terms only: A function 
-#                that gives the gradient of the eta map above.
-#                If theta has length p and eta has length q, then gradient
-#                should return a p by q matrix.
-#                This function takes two args:  theta and length(eta).
+#                argument may be omitted.  For example, the degree0 term 
+#                would require 'emptynwstats' since degree0 = number of 
+#                nodes for the empty network.
+#        params: For curved exponential family model terms only, a list of 
+#                (numeric) initial values for the parameters of  
+#                curved exponential family model terms. Each item in the  
+#                list should be named with the corresponding parameter name 
+#                (one or more of these will probably coincide with the 
+#                 coef.names).  For example, the gwesp term returns 
+#                params=list(gwesp=NULL,gwesp.alpha=alpha), where alpha
+#                was specified as an argument to the gwesp term. 
+#           map: For curved exponential family model terms only, a function 
+#                giving the map from the canonical parameters, theta,
+#                associated with the statistics for this term, to eta, 
+#                the corresponding curved parameters.  The length of eta 
+#                is the same as the length of the 'params' list above.
+#                The function takes two arguments:  theta and length(eta).
+#      gradient: For curved exponential family model terms only, a function 
+#                giving the gradient of the 'map'. If theta has length p 
+#                and eta has length q, then gradient should return a
+#                p by q matrix. This function takes two arguments:  theta 
+#                and length(eta).
 #
-# WHAT THE C CHANGESTAT FUNCTION RECEIVES:
-#                The changestat function, written in C and called d_<name>,
-#                where <name> is the character string passed as the required
-#                output item called "name" (see above), will have access to
-#                the vector of double-precision values created by the 
-#                InitErgmTerm function as the optional output item called
-#                "inputs".  This array will be called INPUT_PARAMS in the C
-#                code and its entries may accessed as INPUT_PARAMS[0],
-#                INPUT_PARAMS[1], and so on.  The size of the INPUT_PARAMS 
-#                array is equal to N_INPUT_PARAMS, a value which is 
-#                automatically set for you and which is available inside the
-#                C function.  Thus INPUT_PARAMS[N_INPUT_PARAMS-1] is the last
-#                element in the vector. 
 
+
+#  ------------------------------------------------------------------------- 
+#   Description of the input parameters to the d_xxxy changestats function, 
+#   where xxxy corresponds to the 'name' returned by InitErgmTerm.xxx.
+#  -------------------------------------------------------------------------- 
 #
-# A simple example
-# This is identical to the "edges" term already in "ergm"
-#
-InitErgmTerm.testme <- function(nw, arglist, ...) {
-  # Construct the output list
-  list(name="testme",             #name: required
-       coef.names = "testme",     #coef.names: required
-       pkgname = "ergmuserterms",  # So "ergm" knows where to find it!
-       inputs = NULL,             #There are no extra inputs for this term
-       dependence = FALSE # So we don't use MCMC if not necessary
-       )
-}
-#
-# A longer example 
-# This is identical to the 2-star term already in "ergm"
-InitErgmTerm.m2star <- function(nw, arglist, ...) {
-#
-  # Check the network and arguments to make sure they are appropriate.
-  # make sure that the network is directed
-  a <- check.ErgmTerm(nw, arglist, directed=TRUE, bipartite=NULL,
-                      varnames = NULL,
-                      vartypes = NULL,
-                      defaultvalues = list(),
-                      required = NULL)
-  # Construct the output list
-  list(name="m2star",             #name: required
-       coef.names = "m2star",     #coef.names: required
-       pkgname = "ergmuserterms",  # So "ergm" knows where to find it!
-       inputs = NULL,             #There are no extra inputs for this term
-       dependence = TRUE # So we need to use MCMC 
-       )
+#  INPUTS:
+#  Each d_xxxy function takes five arguments:
+#	    ntoggles: the number of toggles as described in 
+#                 "ergm.userterms: A template package"
+#          heads: a pointer to the array of the head nodes of the 
+#                 proposed edges to be toggled
+#          tails: a pointer to the array of the tail nodes of the
+#                 proposed edges to be toggled
+#            mtp: a pointer to the model, which includes the following:
+#                 dstats      : a pointer to the array of changestats,
+#                               macro-ed as CHANGE_STAT
+#                 nstats      : the length of 'dstats', macro-ed as
+#                               N_CHANGE_STATS
+#                 inputparams : a pointer to the vector of input 
+#                               parameters. This is supplied by the
+#                               'inputs' returned by InitErgmTerm.xxx
+#                               and is macro-ed as INPUT_PARAM
+#                 ninputparams: the length of 'inputparams', macro-ed
+#                               as N_INPUT_PARAMS
+#            nwp: a pointer to the network.  This includes several 
+#                 components and several macros exist for accessing
+#                 these. See the changestat.h file for a list of these
+#                 components and their macros. 
+#  These inputs are automatically supplied to the d_xxxy function by the 
+#  network_stats_wrapper function 
+
+
+
+#  ------------------------------------------------------------------------- 
+#  Sample InitErgmTerm function(s)
+#  -------------------------------------------------------------------------- 
+
+#  This InitErgmTerm function is for the mindegree term described
+#  in Hunter, Goodreau, and Handcock (2010), "ergm.userterms:  A
+#  Template for Building Plug-in Packages for statnet"
+InitErgmTerm.mindegree <- function(nw, arglist, ...) {
+  a <- check.ErgmTerm(nw, arglist, directed=FALSE, bipartite=FALSE,
+      varnames = c("mindeg", "by"),
+      vartypes = c("numeric", "character"),
+      required = c(TRUE, FALSE),
+      defaultvalues = list(NULL, NULL))
+  if(length(a$mindeg) > 1)
+    stop("The argument mindeg to mindegree expected a vector of length ",
+         "1, but received a vector of length ",length(a$mindeg))
+  if (is.null(a$by)) {
+    attrflag <- 0
+    nodecov <- NULL
+    coef.names <- paste("mindegree", a$mindeg, sep="")
+  } else {
+    attrflag <- 1
+    nodecov <- get.node.attr(nw, a$by)
+    coef.names <- paste("mindegree.", a$by, a$mindeg, sep="")
+  }
+  u <- sort(unique(nodecov))
+  nodecov <- match(nodecov,u)
+  list(name = "mindegree",
+      coef.names = coef.names,
+      pkgname = "ergm.userterms",
+      inputs = c(attrflag, a$mindeg, nodecov),
+      dependence = TRUE,
+      emptynwstats = (a$mindeg == 0) * network.size(nw)
+  )
 }
 
-#
-# An example with covariates
-# This is identical to the "absdiff" term already in "ergm"
-#
-InitErgmTerm.absdiffme <- function(nw, arglist, ...) {
-  # Check the network and arguments to make sure they are appropriate.
-  a <- check.ErgmTerm(nw, arglist, directed=NULL, bipartite=NULL,
-                          varnames = c("attrname"),
-                          vartypes = c("character"),
-                          defaultvalues = list(NULL),
-                          required = c(TRUE))  
-  assignvariables(a) # create local variables from names in 'varnames'
-  # Process the arguments
-  nodecov <- get.node.attr(nw, attrname)
-  ### Construct the list to return
-  list(name="absdiffme",                                     #name: required
-       coef.names = paste("absdiffme", attrname, sep="."), #coef.names: required
-       pkgname = "ergmuserterms",  # So "ergm" knows where to find it!
-       inputs = nodecov,  # We need to include the nodal covariate for this term
-       dependence = FALSE # So we don't use MCMC if not necessary
-       )
-}
-
-# See R/InitErgmTerm.R in the source distribution of the "ergm" 
-# package for more examples.
 

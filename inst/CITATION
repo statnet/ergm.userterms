@@ -6,8 +6,8 @@ statnettitle <- "statnet: Software Tools for the Statistical Modeling of Network
 statnetversion <- "2.1"
 statnetyear <- "2003"
 
-ergmtitle <- "ergmuserterms: User-specified terms for the statnet suite of packages"
-ergmdesc <- packageDescription("ergmuserterms")
+ergmtitle <- "ergm.userterms: User-specified terms for the statnet suite of packages"
+ergmdesc <- packageDescription("ergm.userterms")
 ergmversion <- ergmdesc$Version
 ergmdate <- ergmdesc$Date
 s <- regexpr("20[0-9][0-9]", ergmdate)
@@ -15,12 +15,12 @@ ergmyear <- ifelse (s==-1, "2003", substr(ergmdate, s, s+3))
       
 
 citHeader(
-   "'ergmuserterms' is part of the statnet suite of packages.  ",
-   'Please read the license using license.statnet("ergmuserterms").\n\n',
-   "If you are using the 'ergmuserterms' package for research that will be published, ",
+   "'ergm.userterms' is part of the statnet suite of packages.  ",
+   'Please read the license using license.statnet("ergm.userterms").\n\n',
+   "If you are using the 'ergm.userterms' package for research that will be published, ",
    "we request that you acknowledge this by citing 'statnet' as shown below.\n\n",
-   "To cite the individual package 'ergmuserterms', please use the second citation below.\n\n",
-   'For BibTeX format, use toBibtex(citation("ergmuserterms")).',
+   "To cite the individual package 'ergm.userterms', please use the second citation below.\n\n",
+   'For BibTeX format, use toBibtex(citation("ergm.userterms")).',
    sep="")
    
 citEntry(entry = "Manual",
@@ -45,11 +45,11 @@ citEntry(entry="Manual",
                         ".  Project home page at \\url{", projhomepage, "}", 
                         sep=""),
          address      = "Seattle, WA",
-         url          = "http://CRAN.R-project.org/package=ergmuserterms",
+         url          = "http://CRAN.R-project.org/package=ergm.userterms",
          textVersion = paste(paste(authors, collapse=", "), " (", ergmyear,
                "), ", ergmtitle, ". Version ", ergmversion,
                ". Project home page at ", projhomepage,
-               ". URL http://CRAN.R-project.org/package=ergmuserterms.",
+               ". URL http://CRAN.R-project.org/package=ergm.userterms.",
                sep="")
          )
 

@@ -1,4 +1,11 @@
 library(network)
+twonode = network(matrix(c(0,0,1,0),2,2))
+plot(twonode, coord=matrix(c(0,1,0,0),2,2), jitter=F,
+ label=c(3,5), boxed.labels=F, vertex.cex=5,
+ label.pos=5, label.cex=2, edge.lwd=3, arrowhead.cex=3)
+text(0,0.15,"Tail Node", cex=2)
+text(1,0.15,"Head Node", cex=2)
+
 m=matrix(c(
  0, 0, 1, 0, 0, 1, 0, 1,
  0, 0, 0, 0, 1, 0, 0, 0,

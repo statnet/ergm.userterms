@@ -31,7 +31,8 @@
 
 \title{\pkg{ergm.userterms}: A Template for Building Plug-in Packages for
 \pkg{statnet}}
-\Plaintitle{ergm.userterms: Plug-in Packages for statnet}
+\Plaintitle{ergm.userterms: A Template for Building 
+Plug-in Packages for statnet}
 \Shorttitle{\pkg{ergm.userterms}: Plug-in Packages for \pkg{statnet}}
 
 \author{
@@ -77,20 +78,59 @@ URL: \url{http://www.stat.psu.edu/~dhunter/}
 \section{Introduction}
 \label{introduction}
 
-Exponential-family random graphs models (``ERG models'' or ``ERGMs'') provide a powerful and flexible family of models for conducting statistical inference on social network structure
-\citep{fra86, statnetjss,ergmjss, statnettutorialjss}.
+Exponential-family random graphs models (``ERG models'' or ``ERGMs'') provide a
+powerful and flexible family of models for conducting statistical inference on
+social network structure \citep{fra86, statnetjss,ergmjss, statnettutorialjss}.
 %\citep{robins2007ier}.
-This framework has been implemented in the \pkg{ergm} package
-\citep{ergmjss}, part of the \pkg{statnet} suite of packages \citep{statnetjss}
-for \proglang{R} \citep{r2010}. Within this framework, there are an essentially unlimited number of potential models; for any one, the probability of a given network is a function of a set of structural network statistics posited by the model. Equivalently, the probability of any individual tie in the network existing, given all other tie states, is a function of changes in those same network statistics induced by the creation of that tie.
+This framework has been implemented in the \pkg{ergm} package \citep{ergmjss},
+part of the \pkg{statnet} suite of packages \citep{statnetjss} for \proglang{R}
+\citep{r2010}. Within this framework, there is an essentially unlimited number
+of potential models; for any one, the probability of a given network is a
+function of a set of structural network statistics posited by the model.
+Equivalently, the probability of any individual tie in the network existing,
+given all other tie states, is a function of changes in those same network
+statistics induced by the creation of that tie.
 
-The use of any network statistic in the \pkg{ergm} package requires a small amount of code to calculate changes to that statistic induced by adding or removing a tie; some of this code is in \proglang{R}, and some in \proglang{C}, where the most computationally intensive tasks in \pkg{ergm} are actually performed. There are a variety of network statistics with substantive interpretations that are commonly found in the literature (e.g. counts of edges, homophilous edges, nodal degrees, triangles or k-stars), and the \pkg{ergm} package includes code to handle many of these.  However, the user who wishes to build a model with a network statistic term not included in the \pkg{ergm} package must write new code to do so.  We have developed a package -- \pkg{ergm.userterms} -- to make this process easier.  The aim of this paper are to describe this package, and explain all of the steps of writing up new ergm terms in order to make this process more user-friendly.
+The use of any network statistic in the \pkg{ergm} package requires a small
+amount of code to calculate changes to that statistic induced by adding or
+removing a tie; some of this code is in \proglang{R}, and some in \proglang{C},
+where the most computationally intensive tasks in \pkg{ergm} are actually
+performed. There are a variety of network statistics with substantive
+interpretations that are commonly found in the literature (e.g. counts of edges,
+homophilous edges, nodal degrees, triangles or k-stars), and the \pkg{ergm}
+package includes code to handle many of these. However, the user who wishes to
+build a model with a network statistic term not included in the \pkg{ergm} package 
+must write new code to do so. We have developed a 
+package---\pkg{ergm.userterms}---to make this process easier. 
+The aims of this paper are
+to describe this package and explain all of the steps of writing up new ERGM
+terms in order to make this process more user-friendly.
 
-In Section~\ref{background}, we provide a statistical overview of the \pkg{ergm} framework, with an emphasis on the ``change statistics'' that must be coded to make the \pkg{ergm} package work.  In Section~\ref{syntax}, we provide additional detail to explain why these statistics must be coded individually, unlike in traditional generalized linear models. Section~\ref{networkstorage} outlines the methods of network storage used throughout the \pkg{statnet} package suite; a basic familiarity with these methods aids the coding of \pkg{ergm} terms considerably. In Section~\ref{Tools} we explain how to acquire all of the necessary tools to build an \proglang{R} package from source and compile \proglang{C} code within Windows. Sections~\ref{Rside} and ~\ref{Cside} describe the \proglang{R} code and \proglang{C} code that a user must write, respectively. Finally, Section~\ref{Example} provides a complete worked example.
+In Section~\ref{background}, we provide a statistical overview of the \pkg{ergm}
+framework, with an emphasis on the ``change statistics'' that must be coded to
+make the \pkg{ergm} package work. In Section~\ref{syntax}, we provide additional
+detail to explain why these statistics must be coded individually, unlike in
+traditional generalized linear models. Section~\ref{networkstorage} outlines the
+methods of network storage used throughout the \pkg{statnet} package suite; a
+basic familiarity with these methods aids the coding of \pkg{ergm} terms
+considerably. In Section~\ref{Tools} we explain how to acquire all of the
+necessary tools to build an \proglang{R} package from source and compile
+\proglang{C} code within Windows. Sections~\ref{Rside} and ~\ref{Cside} describe
+the \proglang{R} code and \proglang{C} code that a user must write,
+respectively. Finally, Section~\ref{Example} provides a complete worked example.
 
-This paper will be most easy to follow for readers who already possess a general familiarity with the \pkg{ergm} and \pkg{network} packages; those without such familiarity may wish to read relevant papers in the {\it Journal of Statistical Software} special volume on \pkg{statnet} first
-\citep{statnetjss,networkjss,ergmjss}.
-Also, users who wish to follow along with the examples or be able to use the instructions from this paper to write their own statistics should be sure to obtain \pkg{ergm} version 2.3 or later before beginning any coding. Prior versions used different (and less user-friendly) routines for coding terms. Although these routines are still allowed for backward compatibility, not all routines in this paper will work in prior versions; moreover, mixing the two approaches will likely cause unnecessary confusion.
+This paper will be most easy to follow for readers who already possess a general
+familiarity with the \pkg{ergm} and \pkg{network} packages; those without such
+familiarity may wish to read relevant papers in the 
+{\it Journal of Statistical Software} special volume on \pkg{statnet} first
+\citep{statnetjss,networkjss,ergmjss}. 
+Also, users who wish to follow along with the examples or be able to use the
+instructions from this paper to write their own statistics should be sure to
+obtain \pkg{ergm} version 2.3 or later before beginning any coding. Prior
+versions used different (and less user-friendly) routines for coding terms.
+Although these routines are still allowed for backward compatibility, not all
+routines in this paper will work in prior versions; moreover, mixing the two
+approaches will likely cause unnecessary confusion.
 
 \section{Background}
 \label{background}
@@ -118,7 +158,7 @@ network $\vec y$ assumed to come from some set ${\cal Y}$ of networks, and
 is the normalizing constant.
 
 The MCMC scheme implemented in \pkg{ergm} is called a Metropolis-Hastings
-algorithm.  In general terms, such an algorithm proceeds from step $t$ to step $t+1$,
+algorithm.  In general terms, such an algorithm proceeds from step $k$ to step $k+1$,
 from one network $\vec y^k$ to the next, by (a) selecting a candidate
 for the next network $\vec y^{k+1}$, (b) computing a {\em Hastings ratio} based on
 $\vec y^k$ and the candidate network, and (c) deciding whether $\vec y^{k+1}$
@@ -143,11 +183,13 @@ the Hastings ratio.  Then
 In particular, note that if the Hastings ratio is greater than one, the candidate $\vec z$ is
 always accepted as the value for $\vec y^{k+1}$.
 
-In \pkg{ergm}, there are different possible choices of the probability distribution $q(\vec z, \vec y_{t})$
+In \pkg{ergm}, there are different possible choices of the probability distribution $q(\vec z, \vec y^k)$
 used to select $\vec z$, but the default choice limits the possible choices of $\vec z$
 to those that differ from $\vec y^k$ by exactly one edge indicator;  in other words, $\vec z$
-involves a single edge toggle of $\vec y^k$.  Suppose that $\vec z$ is identical to $\vec y^k$
-in all except the $(i,j)$ entry.  Notationally, we would write $x_{ij}=1-y_{ij}^k$ but
+involves a single edge toggle of $\vec y^k$.  Though more complicated possibilities for $z$
+are possible using the \pkg{ergm} package,
+suppose here that $\vec z$ is identical to $\vec y^k$
+in all except the $(i,j)$ entry.  Notationally, we would write $z_{ij}=1-y_{ij}^k$ but
 $\vec z_{ij}^c=\vec (y^k_{ij})^c$, where $\vec z_{ij}^c$ denotes the entire network $\vec z$
 {\em except for} the $(i,j)$ entry.  In this case, by substituting Equation~(\ref{ergm}) into
 Expression~(\ref{hastings}), we see that the Hastings ratio may be simplified to
@@ -164,11 +206,11 @@ except for the $(i,j)$ entry, which is set to 1 in $\vec y_{ij}^+$ and 0 in $\ve
 The sign of the $\vec\theta_0^\top \delta (\vec y^k)_{ij}$ term
 in~(\ref{hastings2}) depends on the value
 of $y_{ij}^k$:  If $y_{ij}^k=1$, then the term gets a plus sign; otherwise it gets a minus.
-\pkg{ergm} allows $\vec z$a to be more complicated than a single edge indicator
-. It is straight forward to consider networks that can be attained by a
-sequences of single edge changes where each intermediate network is realizable.
-More complicated proposals are also possible as demonstrated in the source code
-of \pkg{ergm} itself.
+%The \pkg{ergm} package allows $\vec z$ to be more complicated than a single
+%edge indicator. It is straightforward to consider networks that can be
+%attained by a sequences of single-edge changes where each intermediate network
+%is realizable. More complicated proposals are also possible as demonstrated in
+%the source code of \pkg{ergm} itself.
 
 The key conclusion of all of the above development is that the calculation of
 change statistic vectors is of vital importance to the running of both the simulation and
@@ -245,12 +287,12 @@ R> glm ( response ~ predictor1 + predictor2 + predictor3, link = binomial)
 \end{CodeInput}
 \end{CodeChunk}
 In a general ERGM, there
-is no way to define \code{predictor1}, ..., \code{predictor3},
+is no way to define \code{predictor1} through \code{predictor3},
 nor is there a closed-form way to relate the expected value of the random
 network to the linear combination of the network statistics.  Thus, there is
 no way to specify a link function and the standard \proglang{R} formula
 (that is, \code{response ~ predictors}) does not apply.  Nonetheless, there
-are still analogies to standard regression models, so the
+are still analogies to standard generalized linear models, so the
 \code{ergm} function was designed to employ a modified version of the
 standard \proglang{R} formula:
 \begin{CodeChunk}
@@ -260,7 +302,7 @@ R> ergm ( network ~ netstat1 + netstat2 + netstat3)
 \end{CodeChunk}
 Numerous examples of calls to the \code{ergm} function may be found in
 \citet{ergmjss} and \citet{statnettutorialjss}, and a list of numerous possibilities
-for \code{netstat1}, ..., \code{netstat3}, is given in \citet{ergmtermsjss}.
+for \code{netstat1} through \code{netstat3}, is given in \citet{ergmtermsjss}.
 
 {\bf Remark:\ }
 For certain choices of the vector $\vec g(\vec y)$ of graph statistics, the resulting
@@ -273,7 +315,9 @@ dyadic independence models.
 \section[Network storage in ergm]{Network storage in \pkg{ergm}}
 \label{networkstorage}
 
-An understanding of the internal storage of a network in the \pkg{ergm} package aids the writing of code for a change statistic. We describe this storage in some detail here.
+An understanding of the internal storage of a network in the \pkg{ergm} package
+aids the writing of code for a change statistic. We therefore
+describe this storage in some detail here.
 This storage method is quite different from that of the \pkg{network} package,
 which allows for much more general network-type objects
 than those of the \pkg{ergm} package \citep{networkjss}.
@@ -282,19 +326,26 @@ handle only edges from one node to another
 so that adding, deleting, and accessing the structure of the network is as
 fast as possible.
 
+\begin{figure}[h!]
+\centerline{\includegraphics[width=3in]{twonode.pdf}}
+\caption{A directed edge, sometimes termed an arc, from
+node 3 to node 5.}\label{directededge}
+\end{figure}
+
 A network
 with $n$ nodes is internally represented in \pkg{ergm} as a set of $2n$ edgelists,
 $n$ for ``in-edges'' and $n$ for ``out-edges''.  If the directed edge
 $3\!\!\longrightarrow\!\!5$ exists in the network,
 then we call 3 the ``tail'' node and 5 the ``head'' node of this edge.  We would say that node 5 is
 on an out-edge from node 3 and that node 3 is on an in-edge to node 5.  Thus, the 3rd out-edge list
-should contain 5 and the 5th in-edge list should contain 3.  Naturally, this scheme results in
-redundancy, and maintaining these two sets of edgelists entails both a storage and a performance
-cost.  However, in situations where an algorithm must be able to look up both all in-edges and all
-out-edges of a node, this scheme is very efficient.
+should contain 5 and the 5th in-edge list should contain 3.  This redundant storage
+scheme, requiring double the memory that a single representation of the network
+would require, results in a corresponding gain in efficiency, since every edge
+may be accessed via either of its nodes.
 
-
-Undirected networks are effectively stored as directed networks in \pkg{statnet}.  In this case, the
+Undirected networks are effectively stored as directed networks in \pkg{ergm} but with
+each edge stored in only one direction.
+In this case, the
 designations of ``head'' and ``tail'' are arbitrary; we define the smaller-numbered node as the tail
 and the larger-numbered node as the head. Thus, the undirected edge
 $2\!\!\longleftrightarrow\!\!4$ would actually be stored as the directed edge
@@ -311,43 +362,58 @@ $\displaystyle{\pmatrix{
  1 & 1 & 0 & 0 & 0 & 0 & 0 & 1 \cr
  0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \cr
  1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 }
- }\qquad\qquad\vtop{\vskip-15ex \hbox{\includegraphics[height=2in, width=2in]{net8nodes.pdf}}}
+ }\qquad\qquad\vtop{\vskip-12ex \hbox{\includegraphics[height=1.75in, width=1.75in]{net8nodes.pdf}}}
 $}
-\caption{Adjacency matrix (left panel) and corresponding graphical representation
-of a directed 8-node network (right panel).  The rows of the adjacency matrix define
-the out-edge lists of Figure \ref{outedgefig}.}\label{8nodeexample}
+\caption{Adjacency matrix (left) and corresponding graphical representation
+of a directed 8-node network (right).  The rows of the adjacency matrix define
+the out-edge lists of Figure~\ref{outedgefig}.}\label{8nodeexample}
 \end{figure}
 
 \begin{figure}[htb]
 \centerline{\includegraphics[height=2in, width=4in]{outedgelists.pdf}}
-\caption{This is the resulting internal representation of the out-edges for the network of
-Figure \ref{8nodeexample}.  Each node's out-neighbors are permuted randomly
-before the binary trees are built.}\label{outedgefig}
+\caption{This is one possible \pkg{ergm} 
+representation of the out-edges for the network of
+Figure~\ref{8nodeexample}. The network would be redundantly represented as
+a set of in-edge trees.}\label{outedgefig}
 \end{figure}
 
-Storage of each node's in-edge list and out-edge list is implemented using a standard
-binary tree structure
-\cite[Chapter 13]{algorithms}.  This structure allows for efficient lookup, insertion, and deletion
-operations that typically take $O(\log d)$ time, where $d$ is the degree, or number of neighbors, a
-particular node has.  A binary tree 
-representing the network of Figure~\ref{8nodeexample} is given in
-Figure~\ref{outedgefig}. In this figure, a dyad has a parent-child relationship if they are tied. In this case, the node spatially above the other is called a
-{\it parent} node and the other is called a {\it child} node (in the context of
-the relationship).
-In Figure~\ref{outedgefig}
-each parent node has two potential children, with the left child's value always less than the
-parent's and the right child's value always greater.  To avoid the worst-case performance
-that can result from a list of values being passed in strictly increasing or decreasing order,
-each node's edgelist is randomly permuted before it is stored as a tree.
+Storage of each node's in-edge list and out-edge list is implemented using a
+standard binary tree structure \citep[Chapter 13]{algorithms}. This 
+structure allows for efficient lookup, insertion, and deletion operations that
+typically take $O(\log d)$ time, where $d$ is the degree, or number of
+neighbors, a particular node has. A set of binary trees representing the network of
+Figure~\ref{8nodeexample} is given in Figure~\ref{outedgefig}. 
+In this figure, every row of the adjacency matrix in Figure~\ref{8nodeexample}
+is represented by its own tree, indexed by the tail node, where each numbered 
+circular dot represents the head in a $(\mbox{tail}, \mbox{head})$ network edge.
+Even the root of the tree is a head node, so in case the tail has no edges, the
+root of the (empty) tree would have label 0.
+Though the depiction of the trees in Figure~\ref{outedgefig} has its own network-like
+appearance, this structure has nothing to do with the original network;
+each tree is merely an efficient storage tool for a list of node labels.  In the trees,
+each node may have up to two 
+``child'' nodes, shown below it, one to the left and one to the right.
+The rule for constructing the tree, which enables the fast lookup, insertion, and
+deletion operations of a binary tree,
+ is that the left child's label (if that child exists)
+ must always be larger than its parent's label while the
+ right child's label must always be larger.
+The designation of the root node's value in each tree is completely 
+arbitrary, as particular list of node labels might be used to populate
+a tree in any order desired.
+To avoid the worst-case performance that can result from a list
+of values being passed in strictly increasing or decreasing order, each node's
+edgelist is randomly permuted before it is stored as a tree.
 
-The binary tree routines, all written in the C language, are contained in the
+The binary tree routines, all written in the \proglang{C} language, are contained in the
 \code{src/edgetree.c} file in the \pkg{ergm.userterms} package. The \pkg{ergm} package
 includes the same code.  These routines may be used to initialize or destroy
 a network object, to manipulate that object by adding or deleting edges, and to
 query that object to ascertain the presence of an edge.
-The C language functions \code{NetworkInitialize} and \code{NetworkDestroy} 
+The \proglang{C} language functions \code{NetworkInitialize} and \code{NetworkDestroy} 
 are used internally by the \pkg{ergm} package to create a network object
-and destroy it when it is no longer needed by the C code.  These two functions
+and destroy it when it is no longer needed by the \proglang{C} code.  
+These two functions
 are not generally called by the user, though interested users may wish
 to look at them.  Also, the definition of the \code{Network} type, in the
 \code{src/edgetree.h} file, reveals that a network keeps updated lists of every node's
@@ -357,24 +423,51 @@ when writing code for various change statistics as described in Section \ref{Csi
 \section{Acquiring and setting up the necessary tools}
 \label{Tools}
 
-Coding new change statistics for \pkg{ergm} requires two steps that users might not have previously encountered: building an \proglang{R} package from source, and writing and compiling \proglang{C} code. These steps requires additional tools beyond those needed by most \proglang{R} end users; in this section we walk through the process of acquiring and setting up such tools in Windows or Unix-alike operating systems (e.g., MacOS and Linux) with the emphasis on Windows. Those users who are already familiar with this task may wish to skip ahead to Section~\ref{Rside}.
+Coding new change statistics for \pkg{ergm} requires two steps that users might
+not have previously encountered: building an \proglang{R} package from source,
+and writing and compiling \proglang{C} code. These steps requires additional
+tools beyond those needed by most \proglang{R} end users; in this section we
+walk through the process of acquiring and setting up such tools in Windows or
+UNIX-like operating systems (e.g., MacOS and Linux), with the emphasis on
+Windows. 
+Those users who are already familiar with this task may wish to skip ahead to
+Section~\ref{Rside}.
 
 Windows users require a bit of preliminary setup for the building-from-source
 step, which we describe in the separate Section~\ref{AcqTools}.  Users of MacOS X
-need to install the \code{gcc}
+must install the \code{gcc}
 compiler for \proglang{C}, which is found on the Xcode Tools CD or
 DVD that accompanies the MacOS system.  Alternatively, the Xcode Tools may
 be found in the \code{/Applications/Installers} directory or downloaded from the
-web from \url{http://developer.apple.com/tools/xcode/}.  This is explained in the ``Installation of source packages" section of the
+web from \url{http://developer.apple.com/tools/xcode/}.  This is explained in the 
+``Installation of source packages'' section of the
 \proglang{R} MacOS X FAQ that may be reached from
-\url{http://cran.r-project.org/faqs.html}.  Users of Unix-alike systems must merely
+\url{http://cran.r-project.org/faqs.html}.  Users of UNIX-like systems must merely
 ensure that the \code{gcc} compiler is available, details of which may be
 found at \url{gcc.gnu.org}.
 
 \subsection{Setup for Windows}
 \label{AcqTools}
 
-Windows users will need three tools: Perl, CLT and MinGW.\footnote{This list of necessary tools is current as of this writing. The authoritative and up-to-date source for the set of tools necessary is Appendix D (``The Windows Toolset'') of the \proglang{R} Installation and Administration manual (\url{http://cran.r-project.org/doc/manuals/R-admin.html\#The-Windows-toolset})} The easiest way to acquire all three is through the website ``Building \proglang{R} for Windows" (currently at \url{http://www.murdoch-sutherland.com/Rtools}), which also provides an excellent overview of the process described in this section.  Simply download the latest version of \code{Rtools.exe} from this website, and install.  While doing so, be sure to check ``Edit the system PATH''; allow it to edit your path so that \code{c:\textbackslash Program Files\textbackslash Rtools\textbackslash bin}, \code{c:\textbackslash Program Files\textbackslash Rtools\textbackslash perl\textbackslash bin}, and \code{c:\textbackslash Program Files\textbackslash Rtools\textbackslash MinGW\textbackslash bin} are up front. After these three entries, insert an additional entry containing the bin directory of your current \proglang{R} installation.  This is typically \code{C:\textbackslash Program Files\textbackslash R\textbackslash R-X\textbackslash bin}, where \code{X} is your \proglang{R} version number.
+Windows users will need three tools: Perl, CLT and MinGW.\footnote{This list of
+necessary tools is current as of this writing. The authoritative and up-to-date
+source for the set of tools necessary is Appendix D (``The Windows Toolset'') of
+the \proglang{R} Installation and Administration manual
+(\url{http://cran.r-project.org/doc/manuals/R-admin.html\#The-Windows-toolset})}
+The easiest way to acquire all three is through the website ``Building
+\proglang{R} for Windows'' (currently at
+\url{http://www.murdoch-sutherland.com/Rtools}), which also provides an
+excellent overview of the process described in this section. Simply download the
+latest version of \code{Rtools.exe} from this website and install.  While 
+doing so, be sure to check ``Edit the system PATH''; allow it to edit your path
+so that \code{c:\textbackslash Program Files\textbackslash Rtools\textbackslash
+bin}, \code{c:\textbackslash Program Files\textbackslash Rtools\textbackslash
+perl\textbackslash bin}, and \code{c:\textbackslash Program Files\textbackslash
+Rtools\textbackslash MinGW\textbackslash bin} are up front. After these three
+entries, insert an additional entry containing the bin directory of your current
+\proglang{R} installation. This is typically \code{C:\textbackslash Program
+Files\textbackslash R\textbackslash R-X\textbackslash bin}, where \code{X} is
+your \proglang{R} version number.
 
 
 \subsection[Obtaining source code for the ergm.userterms package]{Obtaining source code for the \pkg{ergm.userterms} package}
@@ -394,7 +487,7 @@ link.
 \item Save this file in \code{R-working-directory\textbackslash src\textbackslash library}.  Be very careful not to place it in \code{R-working-directory\textbackslash library}. In fact, you can technically place the file anywhere on your machine, as long as it is not in \code{R-working-directory\textbackslash library}.  In Windows, your \proglang{R} working directory will typically be \code{C:\textbackslash Program Files\textbackslash R\textbackslash R-X}, where \code{X} is your \proglang{R} version number).
 \item Untar the file by opening a DOS window in
 Windows (\code{Start>Run} and type \code{cmd}) or a terminal window in
-Unix-alike systems,
+UNIX-like systems,
 navigating to the folder where you just saved the source code file
 using \code{cd}, and typing \code{tar xfz name.of.sourcecode.file}.
 A directory named \code{ergm.userterms} will be extracted in your current directory.
@@ -409,14 +502,14 @@ For Windows, in a DOS window, go to the same directory where you saved the \pkg{
 RCMD INSTALL ergm.userterms
 \end{CodeInput}
 \end{CodeChunk}
-For Unix-alike systems, use the same syntax but split \code{RCMD}
+For UNIX-like systems, use the same syntax but split \code{RCMD}
 into two words: \code{R CMD}.
 You can now load the basic \pkg{ergm.userterms} package within \proglang{R} with the \code{library(ergm.userterms)} command.
 
-In Sections~\ref{Rside} and~\ref{Cside} we will describe the process of editing the R and C code to make new statistics.  Any time you have made changes that you want to see incorporated into the version of \pkg{ergm.userterms} that you are using in \proglang{R}, simply repeat the instructions here in section~\ref{BuildEUT}.
+In Sections~\ref{Rside} and~\ref{Cside} we will describe the process of editing the \proglang{R} and \proglang{C} code to make new statistics.  Any time you have made changes that you want to see incorporated into the version of \pkg{ergm.userterms} that you are using in \proglang{R}, simply repeat the instructions here in section~\ref{BuildEUT}.
 
 \section[Writing change statistics using ergm.userterms:  The R side]%
-{Writing change statistics using \pkg{ergm.userterms}:  The R side}
+{Writing change statistics using \pkg{ergm.userterms}:  The \proglang{R} side}
 \label{Rside}
 
 A typical call to the \code{ergm} function might look like this:
@@ -440,7 +533,7 @@ The \proglang{R} function, whose purpose is to initialize the internal represent
 of the model term  just after a call to the  \code{ergm} function,
 must be called \code{InitErgmTerm.termname}.  It should have a specified format and should
 perform certain tasks.  We will examine these by considering the
-\code{absdiff} term:
+\code{absdiff} term from the \pkg{ergm} package:
 \begin{CodeChunk}
 \begin{CodeInput}
  InitErgmTerm.absdiff <- function(nw, arglist, ...) {
@@ -515,7 +608,7 @@ a list whose items are all named.  Some names are required, and some
 are optional.  A full list of these is given in the header of the \code{InitErgmTerm.users.R}
 file in the \code{R} subdirectory of the \pkg{ergm.userterms} package.
 The first named item shown here, \code{name}, is required.  It gives the name
-of the C function (when ``\code{d_}'' is prepended) that will calculate the
+of the \proglang{C} function (when ``\code{d_}'' is prepended) that will calculate the
 change statistic(s) for this term; see Section \ref{Cside} for details.  In this case,
 we know that the function \code{d_absdiff} will be responsible for this calculation.
 \item [Line 12:]  The \code{coef.names} is another required element in the output
@@ -570,10 +663,14 @@ package if it is saved in a file ending with the extension \code{.R} in the \cod
 For instance, a user may simply use a text editor to add new \code{InitErgmTerm}
 functions to the existing \code{InitErgmTerm.users.R} file; these
 functions will then automatically be incorporated into the \pkg{ergm.userterms}
-package.
+package.  By analogy, the \code{InitErgmTerm.absdiff} function examined here is 
+found in the \code{InitErgmTerm.R} file in the \code{R} subdirectory in the
+\pkg{ergm} package; indeed, that file contains a wealth of other examples that
+may be examined, copied, and modified by users interested in 
+producing their own model terms.
 
 \section[Writing change statistics using ergm.userterms:  The C side]%
-{Writing change statistics using \pkg{ergm.userterms}:  The C side}
+{Writing change statistics using \pkg{ergm.userterms}:  The \proglang{C} side}
 \label{Cside}
 
 As explained at the beginning of Section \ref{Rside}, adding a term to be
@@ -616,7 +713,7 @@ CHANGESTAT_FN(d_absdiff) {
   double change, p; Vertex t, h; int i;
   ZERO_ALL_CHANGESTATS(i);
   FOR_EACH_TOGGLE(i) {
-    t = tails[i]; h = heads[i];
+    t = TAIL(i); h = HEAD(i);
     p = INPUT_PARAM[0];
     if(p==1.0){
       change = fabs(INPUT_PARAM[t] - INPUT_PARAM[h]);
@@ -650,7 +747,7 @@ updating the \code{CHANGE_STAT} vector, which has entries
 \code{CHANGE_STAT[0]}, \ldots,
 \code{CHANGE_STAT[N_CHANGE_STATS-1]},
 as appropriate for the $i$th toggle specified by
-\code{tails[i]}, \code{heads[i]}.  The logic is that the proposal could possibly involve
+\code{TAIL(i)}, \code{HEAD(i)}.  The logic is that the proposal could possibly involve
 multiple edge toggles, and the job of the change statistic function is to update the
 change statistics as appropriate for the entire set of toggles.
 Since some of the macros, such as \code{ZERO_ALL_CHANGESTATS} and
@@ -660,8 +757,10 @@ Since some of the macros, such as \code{ZERO_ALL_CHANGESTATS} and
 
 Inside the \code{FOR_EACH_TOGGLE(i)} loop, the value of \code{i}
 counts from 0 to \code{ntoggles-1}, where \code{ntoggles} is the total number of
-toggles being considered.  In each case, the proposed toggle is to the
-directed edge (\code{tails[i], heads[i]}).  Even when the network is considered undirected,
+toggles being considered.  In each case, the proposed toggle---from edge to non-edge
+or vice-versa, depending on the current state---is to the
+ordered node pair (\code{TAIL(i), HEAD(i)}).  
+Even when the network is considered undirected,
 every edge is stored as a directed edge from the ``tail'' node to the ``head'' node.
 After initially zeroing all of the change statistics using the
 \code{ZERO_ALL_CHANGESTATS} macro, the function should, for each edge
@@ -677,7 +776,7 @@ the same as type \code{int}), whereas \code{p} and \code{change} are of type
 \code{double}:
 \begin{CodeChunk}
 \begin{CodeInput}
-    t = tails[i]; h = heads[i];
+    t = TAIL(i); h = HEAD(i);
     p = INPUT_PARAM[0];
     if(p==1.0){
       change = fabs(INPUT_PARAM[t] - INPUT_PARAM[h]);
@@ -715,7 +814,13 @@ $t\!\longrightarrow\!h$ where $t<h$, so
 In this case, it suffices to check whether \code{(t,h)} is
 an outedge:  If it is, then the toggle would remove the edge and so
 we should add \code{-change} to \code{CHANGE_STAT[0]}; otherwise,
-we should add \code{change}.
+we should add \code{change}.  Since each example in this
+article involves a term for which 
+\code{N_CHANGE_STATS} is equal to one, the reader might 
+benefit from examining the \proglang{C}
+code for a term in the \pkg{ergm} package that can involve
+more than one change statistic, such as 
+\code{degree} or \code{nodematch}.
 
 In some change statistic functions, it is necessary to look at all of the current
 neighbors of a particular node.  The macros
@@ -770,7 +875,6 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
 }
 \end{CodeInput}
 \end{CodeChunk}
-
 Next we must decide on the arguments for \code{mindegree}.  Certainly we must include at least one argument, the minimum degree.  The \code{degree} term also allows the user to specify, via the \code{by} argument, a nodal attribute on which ego and alter must match in order to be counted. Should we follow suit? For the sake of demonstration, let us do so.  The \code{degree} term also has a \code{homophily}
 argument, whose value is either \code{TRUE} or \code{FALSE}, and when it is
 \code{FALSE} the meaning of the \code{by} argument changes.  We will not
@@ -778,9 +882,10 @@ duplicate the \code{homophily} option in \code{mindegree},
 which is to say we will fix it as \code{TRUE}.
 Note also that the degree term allows users to pass a vector of degrees, not just a single one.  In this case, it seems less likely that a user would be interested in multiple mindegrees than in multiple degrees; we will leave this feature off, and require the first argument to be a single non-negative integer, rather than a vector.  Note that users who are interested in having multiple minimum degree statistics in a single model still have the option of including multiple mindegree terms in their formula.
 
- This leaves us with two arguments (let's call them ``mindeg'' and ``by''). These are of types numeric and character, respectively; required and optional, respectively; and should probably have no default values:
-
-\begin{CodeChunk}
+This leaves us with two arguments (let's call them ``mindeg'' and ``by''). These
+are of types numeric and character, respectively; required and optional,
+respectively; and should probably have no default values:
+ \begin{CodeChunk}
 \begin{CodeInput}
 InitErgmTerm.mindegree <- function(nw, arglist, ...) {
   a <- check.ErgmTerm(nw, arglist, directed=FALSE, bipartite=FALSE,
@@ -793,8 +898,29 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
 \end{CodeInput}
 \end{CodeChunk}
 
-Our remaining task is to generate the list to be returned by the function, including any processing of arguments required for that list. In our case, the values of some of our entries will vary depending on whether we are using the homogeneous version of the statistic (i.e. without a nodal attribute) or the attribute-specific version.  One of these is the vector of attribute values, which is commonly assigned to a vector named ``nodecov'' (for ``nodal covariate'', a synonym for nodal attribute), a convention we shall follow here. If there is no attribute, then nodecov will need to be assigned some value to indicate that.  Our \proglang{C} coding task will also be made easier if we pass a flag (which we will call \code{attrflag}) that tells the \proglang{C} whether or not to expect nodal attribute values. Looking over the various items that need to be included in the list returned by the function, we see one other that should vary between the homogeneous and attribute-specific versions: the names of the statistic and coefficient, assigned to variable \code{coef.names}. If we follow the example of the \code{degree} term, for the homogeneous version we will want these to be named \code{mindegree}{\it x}, where {\it x} is the degree cutoff for the statistic; with an attribute, they should be named \code{mindegree.attrname}{\it x}, where \code{attrname} is the name of the attribute in the \code{by} argument. For example, if the degree cutoff is 2, we want the terms to be named \code{mindegree2} and \code{mindegree.attrname2}, respectively. Determining the values of \code{attrflag}, \code{nodecov}, and  \code{coef.names} thus all begin with the same condition, so we can combine them in a single \code{if} statement:
-
+Our remaining task is to generate the list to be returned by the function,
+including any processing of arguments required for that list. In our case, the
+values of some of our entries will vary depending on whether we are using the
+homogeneous version of the statistic (i.e. without a nodal attribute) or the
+attribute-specific version. One of these is the vector of attribute values,
+which is commonly assigned to a vector named ``nodecov'' (for ``nodal
+covariate'', a synonym for nodal attribute), a convention we shall follow here.
+If there is no attribute, then nodecov will need to be assigned some value to
+indicate that. Our \proglang{C} coding task will also be made easier if we pass
+a flag (which we will call \code{attrflag}) that tells the \proglang{C} whether
+or not to expect nodal attribute values. Looking over the various items that
+need to be included in the list returned by the function, we see one other that
+should vary between the homogeneous and attribute-specific versions: the names
+of the statistic and coefficient, assigned to variable \code{coef.names}. If we
+follow the example of the \code{degree} term, for the homogeneous version we
+will want these to be named \code{mindegree}{\it x}, where {\it x} is the degree
+cutoff for the statistic; with an attribute, they should be named
+\code{mindegree.attrname}{\it x}, where \code{attrname} is the name of the
+attribute in the \code{by} argument. For example, if the degree cutoff is 2, we
+want the terms to be named \code{mindegree2} and \code{mindegree.attrname2},
+respectively. Determining the values of \code{attrflag}, \code{nodecov}, and
+\code{coef.names} thus all begin with the same condition, so we can combine them
+in a single \code{if} statement:
 \begin{CodeChunk}
 \begin{CodeInput}
   if (is.null(a$by)) {
@@ -809,19 +935,36 @@ Our remaining task is to generate the list to be returned by the function, inclu
 \end{CodeInput}
 \end{CodeChunk}
 
-For the attribute-matching case, the object nodecov now contains a vector of the values of that attribute for all the nodes. Within the \pkg{statnet} suite, nodal attributes can be either numeric or character-based. It will much easier to write \proglang{R} code converting a character-based attribute into a numeric than it will be to write \proglang{C} code that can handle either a numeric or character vector.  This is because it doesn't matter what the actual values of the attribute are for individual nodes; all that affects our statistic is whether any two nodes have the same value or not.  We can simply determine all of the unique values for the attribute in our network, assign each a numeric value (based on its alphabetic position, typically), and then replace the nodes' character-based attribute values with the new numeric ranks.  In \proglang{R}, one example of code to do this is:
-
+For the attribute-matching case, the object nodecov now contains a vector of the
+values of that attribute for all the nodes. Within the \pkg{statnet} suite,
+nodal attributes can be either numeric or character-based. It will much easier
+to write \proglang{R} code converting a character-based attribute into a numeric
+than it will be to write \proglang{C} code that can handle either a numeric or
+character vector. This is because it doesn't matter what the actual values of
+the attribute are for individual nodes; all that affects our statistic is
+whether any two nodes have the same value or not. We can simply determine all of
+the unique values for the attribute in our network, assign each a numeric value
+(based on its alphabetic position, typically), and then replace the nodes'
+character-based attribute values with the new numeric ranks. In \proglang{R},
+one example of code to do this is:
 \begin{CodeChunk}
 \begin{CodeInput}
   u <- sort(unique(nodecov))
   nodecov <- match(nodecov,u)
 \end{CodeInput}
 \end{CodeChunk}
+which has the added benefit of handling an attribute that is passed in as
+numeric as well.
 
-which has the added benefit of handling an attribute that is passed in as numeric as well.
-
-Some elements of the list to be returned by the function are straightforward (\code{names}, \code{pkgname}, \code{dependence}).  We have already addressed \code{coef.names}. In the \code{inputs} vector, we combine everything that the \proglang{C} code will need to know the value of: \code{mindeg} as well as the \code{attrflag} and \code{nodecov} objects we made in the previous step. For an empty network, the value of the mindegree statistic depends on what our minimum degree cut-off is; if the cutoff is 0, then the statistic is equal to the number of nodes in the network; but if the cut-off is any positive integer, then the statistic is 0. Thus, our final returned list is going to be:
-
+Some elements of the list to be returned by the function are straightforward
+(\code{names}, \code{pkgname}, \code{dependence}). We have already addressed
+\code{coef.names}. In the \code{inputs} vector, we combine everything that the
+\proglang{C} code will need to know the value of: \code{mindeg} as well as the
+\code{attrflag} and \code{nodecov} objects we made in the previous step. For an
+empty network, the value of the mindegree statistic depends on what our minimum
+degree cut-off is; if the cutoff is 0, then the statistic is equal to the number
+of nodes in the network; but if the cut-off is any positive integer, then the
+statistic is 0. Thus, our final returned list is going to be:
 \begin{CodeChunk}
 \begin{CodeInput}
   list(name = "mindegree",
@@ -834,20 +977,24 @@ Some elements of the list to be returned by the function are straightforward (\c
 \end{CodeInput}
 \end{CodeChunk}
 
-Note that the dependence argument is not strictly needed, since the default is TRUE, but is included for the sake of completeness.
+Note that the dependence argument is not strictly needed, since the default is
+TRUE, but is included for the sake of completeness.
 
-One additional task we may wish to add is some checks on the arguments that the user has passed.  For instance, since the first argument for \code{mindegree} differs from that of \code{degree} (constrained to be a single numeric in the first case; allowed to be a vector in the latter), we may want to check that the user has followed whatever documentation we will write for the statistic, rather than assuming it is exactly parallel to \code{degree}:
-
+One additional task we may wish to add is some checks on the arguments that the
+user has passed. For instance, since the first argument for \code{mindegree}
+differs from that of \code{degree} (constrained to be a single numeric in the
+first case; allowed to be a vector in the latter), we may want to check that the
+user has followed whatever documentation we will write for the statistic, rather
+than assuming it is exactly parallel to \code{degree}:
 \begin{CodeChunk}
 \begin{CodeInput}
   if(length(a$mindeg) > 1)
-    stop("The argument mindeg to mindegree expected a vector of length
-          1, but received a vector of length", length(a$mindeg)).
+    stop("The argument mindeg to mindegree expected a vector of length ",
+         "1, but received a vector of length ",length(a$mindeg))
 \end{CodeInput}
 \end{CodeChunk}
 
 Putting this all together gives us our complete \proglang{R} code:
-
 \begin{CodeChunk}
 \begin{CodeInput}
 InitErgmTerm.mindegree <- function(nw, arglist, ...) {
@@ -857,16 +1004,16 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
       required = c(TRUE, FALSE),
       defaultvalues = list(NULL, NULL))
   if(length(a$mindeg) > 1)
-    stop("The argument mindeg to mindegree expected a vector of length
-          1, but received a vector of length",length(a$mindeg)).
+    stop("The argument mindeg to mindegree expected a vector of length ",
+         "1, but received a vector of length ",length(a$mindeg))
   if (is.null(a$by)) {
     attrflag <- 0
     nodecov <- NULL
-    coef.names <- paste("mindegree", a$mindeg, sep=""),
+    coef.names <- paste("mindegree", a$mindeg, sep="")
   } else {
     attrflag <- 1
     nodecov <- get.node.attr(nw, a$by)
-    coef.names <- paste("mindegree.", a$by, a$mindeg, sep=""),
+    coef.names <- paste("mindegree.", a$by, a$mindeg, sep="")
   }
   u <- sort(unique(nodecov))
   nodecov <- match(nodecov,u)
@@ -881,10 +1028,14 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
 \end{CodeInput}
 \end{CodeChunk}
 
-Let us now turn to the \proglang{C}. Here again, we can choose to add our code to the existing file \code{changestats.c} in the \code{src} directory of the \code{ergm.userterms} source code, or create a new file (with extension \code{.c}) to place in the same directory. If we do the latter, we must be sure to include the line \code{\#include "changestat.h"} at the top of the file.
+Let us now turn to the \proglang{C}. Here again, we can choose to add our code
+to the existing file \code{changestats.c} in the \code{src} directory of the
+\code{ergm.userterms} source code, or create a new file (with extension
+\code{.c}) to place in the same directory. If we do the latter, we must be sure
+to include the line \code{\#include "changestat.h"} at the top of the file.
 
-Following Section~\ref{Cside}, we know that the basic structure of our \proglang{C} code must be:
-
+Following Section~\ref{Cside}, we know that the basic structure of our
+\proglang{C} code must be:
 \begin{CodeChunk}
 \begin{CodeInput}
 CHANGESTAT_FN(d_mindegree) {
@@ -899,8 +1050,11 @@ CHANGESTAT_FN(d_mindegree) {
 \end{CodeInput}
 \end{CodeChunk}
 
-We will need to conduct a different analysis depending on whether \code{attrflag} is 0 or 1, so we should first check this value.  Remember that in the \proglang{R} code we passed the arguments to the \proglang{C} (via the \code{inputs} element) in the order: \code{attrflag}, \code{mindeg}, \code{nodecov}:
-
+We will need to conduct a different analysis depending on whether
+\code{attrflag} is 0 or 1, so we should first check this value. Remember that in
+the \proglang{R} code we passed the arguments to the \proglang{C} (via the
+\code{inputs} element) in the order: \code{attrflag}, \code{mindeg},
+\code{nodecov}:
 \begin{CodeChunk}
 \begin{CodeInput}
   attrflag = INPUT_PARAM[0];
@@ -912,15 +1066,29 @@ We will need to conduct a different analysis depending on whether \code{attrflag
 \end{CodeInput}
 \end{CodeChunk}
 
-The homogeneous case (\code{attrflag=0}) is easier, so let us take this first.  If we were to toggle $y_{ij}$, how might it change the number of nodes in the network with at least \code{mindeg} ties?  If $y_{ij}=0$ (that is, a tie currently does not exist), then we will be adding a tie. In that case, if node $i$ currently has exactly \code{mindeg}$-1$ ties, adding tie $y_{ij}$ will cause $i$ to have \code{mindeg} ties, and the statistic increases by 1; likewise for node $j$.  If $y_{ij}=1$ (i.e. a tie currently exists), then toggling it removes the tie; in this case, if node $i$ currently has exactly \code{mindeg} ties, removing $y_{ij}$ drops them below our threshold, and our statistic decreases by one; likewise, again, for $j$. Looking in the description of the macros in \code{changestat.h}, we see that there are macros called \code{IN_DEG} and \code{OUT_DEG} to check for the in-degree and out-degree of a node; since we are dealing with undirected networks only, which (as mentioned earlier) are stored as directed networks, we must check both. Remember also that, whereas \proglang{R} indexes its vectors starting at position 1, \proglang{C} does so starting at 0. Thus:
-
+The homogeneous case (\code{attrflag=0}) is easier, so let us take this first.
+If we were to toggle $y_{ij}$, how might it change the number of nodes in the
+network with at least \code{mindeg} ties? If $y_{ij}=0$ (that is, a tie
+currently does not exist), then we will be adding a tie. In that case, if node
+$i$ currently has exactly \code{mindeg}$-1$ ties, adding tie $y_{ij}$ will cause
+$i$ to have \code{mindeg} ties, and the statistic increases by 1; likewise for
+node $j$. If $y_{ij}=1$ (i.e., a tie currently exists), then toggling it removes
+the tie; in this case, if node $i$ currently has exactly \code{mindeg} ties,
+removing $y_{ij}$ drops them below our threshold, and our statistic decreases by
+one; likewise, again, for $j$. Looking in the description of the macros in
+\code{changestat.h}, we see that there are macros called \code{IN_DEG} and
+\code{OUT_DEG} to check for the in-degree and out-degree of a node; since we are
+dealing with undirected networks only, which (as mentioned earlier) are stored
+as directed networks, we must check both. Remember also that, whereas
+\proglang{R} indexes its vectors starting at position 1, \proglang{C} does so
+starting at 0. Thus:
 \begin{CodeChunk}
 \begin{CodeInput}
 CHANGESTAT_FN(d_mindegree) {
   /* declarations to go here */
   ZERO_ALL_CHANGESTATS(i);
   FOR_EACH_TOGGLE(i) {
-    t = heads[i]; h = heads[i];
+    t = TAIL(i); h = HEAD(i);
     attrflag = INPUT_PARAM[0];
     mindeg = INPUT_PARAM[1];
     if(attrflag==0){
@@ -968,10 +1136,12 @@ For the version with the nodal attribute, we need to read the values of that att
 
 \end{CodeInput}
 \end{CodeChunk}
+The $+1$ in each of the \code{INPUT_PARAM} indices is because the input vector
+is indexed as 0=\code{attrflag}; 1=\code{mindeg}; 2 to \code{popsize+1} = nodal
+attribute value for nodes 1 to \code{popsize}.
 
-The $+1$ in each of the \code{INPUT_PARAM} indices is because the input vector is indexed as 0=\code{attrflag}; 1=\code{mindeg}; 2 to \code{popsize+1} = nodal attribute value for nodes 1 to \code{popsize}.
-
-Declaring all of the variables that we ended up using, and putting it all together, yields:
+Declaring all of the variables that we ended up using, and putting it all
+together, yields:
 \begin{CodeChunk}
 \begin{CodeInput}
 CHANGESTAT_FN(d_mindegree) {
@@ -983,7 +1153,7 @@ CHANGESTAT_FN(d_mindegree) {
 
   ZERO_ALL_CHANGESTATS(i);
   FOR_EACH_TOGGLE(i) {
-    t = tails[i]; h = heads[i];
+    t = TAIL(i); h = HEAD(i);
     attrflag = INPUT_PARAM[0];
     mindeg = INPUT_PARAM[1];
     if(attrflag==0){
@@ -1023,43 +1193,56 @@ CHANGESTAT_FN(d_mindegree) {
 }
 \end{CodeInput}
 \end{CodeChunk}
-
 Once both the \proglang{C} and \proglang{R} files are completed, one need simply rebuild the package from source, following the instructions in Section~\ref{BuildEUT} and the new terms should appear.
 
 We find that one useful way to test code for new statistics is by generating a wide variety of networks for which one knows the correct values of the statistic, and then using the command:
 \begin{CodeChunk}
 \begin{CodeInput}
-summary(network~new.change.stat)
+summary(network ~ new.change.stat)
 \end{CodeInput}
 \end{CodeChunk}
 to ensure that the code is calculating the correct values.
 
-\section*{Discussion}
+\section{Discussion}
+
 This paper describes how to extend the exponential-family random graph modeling
-capabilities of the \pkg{statnet} suite of packages.
-It details how to use and modify the template package \pkg{ergm.userterms} so users can develop custom terms that can be ``plugged in" to \pkg{statnet}. These terms can then use the full capabilities of the \pkg{statnet} suite of packages.
-There terms will be computed at the C level and operate at native speeds. In
-addition they will be able to use the parallel capabilities of \pkg{statnet}
-without further changes. The advantage of a plug-in architecture is that the
-package will be more portable and be able to take advantage of enhancements to
-the \pkg{statnet} suite. In addition, users may make the plug-in packages
+capabilities of the \pkg{statnet} suite of packages by
+explaining how users may use and modify the template package \pkg{ergm.userterms} to develop custom terms that can be ``plugged in" to \pkg{statnet}. These terms can then use the full capabilities of the \pkg{statnet} suite of packages.
+There terms will be computed at the \proglang{C} level and operate at native speeds. In
+addition, they will be able to use the parallel capabilities of \pkg{statnet}
+without further changes. 
+%The advantage of a plug-in architecture is that the
+%package will be more portable and be able to take advantage of enhancements to
+%the \pkg{statnet} suite. 
+Finally, users may make the plug-in packages
 available to the \pkg{statnet} community, hence extending the analysis and
 modeling capabilities of \pkg{statnet}.
 
-Additional examples abound within the \code{changestats.c} file in the source code; collectively these demonstrate the syntax for the other macros listed in \code{changestat.h} and should answer most other questions for users. When relying on existing network statistics code as examples, it is important to remember the caveat that versions of \pkg{ergm} prior to 2.3 used different methods; these are still allowed for backward compatibility, but modifying individual snippets of code from them and interacting them with newer code may cause problems.  
+Additional examples abound within the \code{changestats.c} file in the source
+code; collectively these demonstrate the syntax for the other macros listed in
+\code{changestat.h} and should answer most other questions for users. When
+relying on existing network statistics code as examples, it is important to
+remember the caveat that versions of \pkg{ergm} prior to 2.3 used different
+methods; these are still allowed for backward compatibility, but modifying
+individual snippets of code from them and interacting them with newer code may
+cause problems.
 
-The fact that the \pkg{ergm.userterms} package comes with a number of macros to make the coding of change statistics easier does not preclude the user from writing their own macros to reduce the amount of coding even further. For instance, the lines of code that currently must appear at the beginning and end of each statistic's \proglang{C} code could be made into a macro as well.  Macros for this, and other code-reducing tasks will likely appear in a future version of the \code{ergm.userterms} package, although their use will always remain optional.
+The fact that the \pkg{ergm.userterms} package comes with a number of macros to
+make the coding of change statistics easier does not preclude users from
+writing their own macros to further streamline coding. For
+instance, the lines of code that currently must appear at the beginning and end
+of each statistic's \proglang{C} code could be incorporated into a macro. Macros
+of this type will likely appear in a future version
+of the \code{ergm.userterms} package, although their use will always remain
+optional.
 
-As \pkg{ergm} is open-source, there are many examples available in the source.
-They provide a library of examples of different complexity and ingenuity that
-cover a wide range of types of terms. In most cases these examples
-can be modified to produce new terms in \pkg{ergm.userterms}.
-
-Additional questions may be posted to the listserv for the \pkg{statnet} users' group, which readers are encouraged to join\citep{statnetusersgroup}.
+Additional questions may be posted to the listserv for the \pkg{statnet} users'
+group, which readers are encouraged to join \citep{statnetusersgroup}.
 
 \section*{Acknowledgments}
 
-We would like to thank the \pkg{statnet} team, including Martina Morris, Carter Butts, Pavel Krivitsky, and Ayn Leslie-Cook.
+We would like to thank the \pkg{statnet} team, including Martina Morris, Carter
+Butts, Pavel Krivitsky, and Ayn Leslie-Cook.
 
 \bibliography{v24}
 
