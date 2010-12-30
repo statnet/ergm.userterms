@@ -29,11 +29,11 @@
 {\mbox{\boldmath$\scriptstyle\bf#1$}}
 {\mbox{\boldmath$\scriptscriptstyle\bf#1$}}}
 
-\title{\pkg{ergm.userterms}: A Template for Building Plug-in Packages for
+\title{\pkg{ergm.userterms}: A Template Package for Extending 
 \pkg{statnet}}
-\Plaintitle{ergm.userterms: A Template for Building 
-Plug-in Packages for statnet}
-\Shorttitle{\pkg{ergm.userterms}: Plug-in Packages for \pkg{statnet}}
+\Plaintitle{ergm.userterms: A Template Package for Extending 
+statnet}
+\Shorttitle{\pkg{ergm.userterms}: A Template for Extending \pkg{statnet}}
 
 \author{
   David R.\ Hunter \\ The Pennsylvania State\\University \And
@@ -47,7 +47,8 @@ Exponential-family random graph models (ERGM) represent a powerful and flexible
 class of models for the statistical analysis of networks. 
 \pkg{statnet} is a suite of software packages that implement these models.
 This paper details how the capabilities for ERGM modeling can be expanded and
-customized using additional plug-in packages for \pkg{statnet}. We describe a
+customized by programming additional network statistics that may be included in
+ERGMs.  We describe a
 template \proglang{R} package called \pkg{ergm.userterms} that can be modified for this purpose. 
 It is designed to make this process as
 straightforward as possible.  We also explain some of the
@@ -81,7 +82,6 @@ URL: \url{http://www.stat.psu.edu/~dhunter/}
 Exponential-family random graphs models (``ERG models'' or ``ERGMs'') provide a
 powerful and flexible family of models for conducting statistical inference on
 social network structure \citep{fra86, statnetjss,ergmjss, statnettutorialjss}.
-%\citep{robins2007ier}.
 This framework has been implemented in the \pkg{ergm} package \citep{ergmjss},
 part of the \pkg{statnet} suite of packages \citep{statnetjss} for \proglang{R}
 \citep{r2010}. Within this framework, there is an essentially unlimited number
@@ -252,7 +252,7 @@ In a generalized linear model, we presume that
 E(Y) = \mbox{link}(\vec X^\top \vec\beta)
 \]
 for some ``link'' function.  Implicit in this formulation is the
-fact that $\vec X$ in considered a fixed quantity, independent of $Y$;
+fact that $\vec X$ is considered a fixed quantity, independent of $Y$;
 indeed, $\vec X$ is often termed the {\em independent} variable.
 (Even when $\vec X$ is random, one typically specifies a generalized
 linear model for the conditional distribution of $Y$ given $\vec X$, so
@@ -294,15 +294,27 @@ no way to specify a link function and the standard \proglang{R} formula
 (that is, \code{response ~ predictors}) does not apply.  Nonetheless, there
 are still analogies to standard generalized linear models, so the
 \code{ergm} function was designed to employ a modified version of the
-standard \proglang{R} formula:
+standard \proglang{R} formula.  Instead of predictors, we refer to elements of
+the right-hand side of the formula as {\em terms}:
 \begin{CodeChunk}
 \begin{CodeInput}
-R> ergm ( network ~ netstat1 + netstat2 + netstat3)
+R> ergm ( network ~ term1 + term2 + term3)
 \end{CodeInput}
 \end{CodeChunk}
 Numerous examples of calls to the \code{ergm} function may be found in
 \citet{ergmjss} and \citet{statnettutorialjss}, and a list of numerous possibilities
-for \code{netstat1} through \code{netstat3}, is given in \citet{ergmtermsjss}.
+for \code{term1} through \code{term3}, is given in \citet{ergmtermsjss}.
+Every term results in one or more network statistics being appended to the 
+$\vec g(\vec y)$ vector.  For example, the function call
+\begin{CodeChunk}
+\begin{CodeInput}
+R> ergm ( network ~ edges + degree(c(1, 3, 4)))
+\end{CodeInput}
+\end{CodeChunk}
+results in a model with four network statistics:
+The \code{edges} term adds
+a single statistic, the number of edges in $\vec y$, whereas the \code{degree(c(1, 3, 4))} term
+adds three, the number of nodes with degree 1, with degree 3, and with degree 4.
 
 {\bf Remark:\ }
 For certain choices of the vector $\vec g(\vec y)$ of graph statistics, the resulting
@@ -336,20 +348,25 @@ A network
 with $n$ nodes is internally represented in \pkg{ergm} as a set of $2n$ edgelists,
 $n$ for ``in-edges'' and $n$ for ``out-edges''.  If the directed edge
 $3\!\!\longrightarrow\!\!5$ exists in the network,
-then we call 3 the ``tail'' node and 5 the ``head'' node of this edge.  We would say that node 5 is
-on an out-edge from node 3 and that node 3 is on an in-edge to node 5.  Thus, the 3rd out-edge list
+then we call 3 the ``tail'' node and 5 the ``head'' node of this edge.  We would say node 3 
+has an {\em out-edge} to node 5 and that node 5 has an {\em in-edge} from node 3, as depicted in
+Figure~\ref{directededge}.  Thus, the 3rd out-edge list
 should contain 5 and the 5th in-edge list should contain 3.  This redundant storage
 scheme, requiring double the memory that a single representation of the network
 would require, results in a corresponding gain in efficiency, since every edge
 may be accessed via either of its nodes.
 
-Undirected networks are effectively stored as directed networks in \pkg{ergm} but with
-each edge stored in only one direction.
-In this case, the
-designations of ``head'' and ``tail'' are arbitrary; we define the smaller-numbered node as the tail
-and the larger-numbered node as the head. Thus, the undirected edge
+Undirected networks are effectively stored as directed networks in \pkg{ergm}
+but with the ``directed'' flag set to zero rather than one.  Essentially, this means that
+the adjacency matrix of an undirected network is represented as having only zeros
+below the main diagonal; the ``tail'' node is taken to be the lower-numbered node
+in each undirected node pair.  
+For example, the undirected edge
 $2\!\!\longleftrightarrow\!\!4$ would actually be stored as the directed edge
-$2\!\!\longrightarrow\!\!4$.
+$2\!\!\longrightarrow\!\!4$.  Every routine written to handle undirected networks
+must therefore check that the directed flag is set to zero and that every edge is
+referenced as $\mbox{tail}\longrightarrow\mbox{head}$ where
+$\mbox{tail}<\mbox{head}$.
 
 \begin{figure}[htb]
 \centerline{\vspace{3ex}
@@ -396,10 +413,10 @@ each node may have up to two
 The rule for constructing the tree, which enables the fast lookup, insertion, and
 deletion operations of a binary tree,
  is that the left child's label (if that child exists)
- must always be larger than its parent's label while the
+ must always be smaller than its parent's label while the
  right child's label must always be larger.
 The designation of the root node's value in each tree is completely 
-arbitrary, as particular list of node labels might be used to populate
+arbitrary, as a particular list of node labels might be used to populate
 a tree in any order desired.
 To avoid the worst-case performance that can result from a list
 of values being passed in strictly increasing or decreasing order, each node's
@@ -683,10 +700,9 @@ in the \code{src} directory, just as the examples in the
 file.
 Any \code{.c} file placed in the \code{src} subdirectory in the
 \pkg{ergm.userterms} package will
-automatically be compiled when the package is installed from source. Just be sure to include the lines:
+automatically be compiled when the package is installed from source. Just be sure to include the line:
 \begin{CodeChunk}
 \begin{CodeInput}
-#include "edgetree.h"
 #include "changestat.h"
 \end{CodeInput}
 \end{CodeChunk}
@@ -747,7 +763,15 @@ updating the \code{CHANGE_STAT} vector, which has entries
 \code{CHANGE_STAT[0]}, \ldots,
 \code{CHANGE_STAT[N_CHANGE_STATS-1]},
 as appropriate for the $i$th toggle specified by
-\code{TAIL(i)}, \code{HEAD(i)}.  The logic is that the proposal could possibly involve
+\code{TAIL(i)}, \code{HEAD(i)}.  It is this portion of the function that should
+be changed according to the requirements of the model statistic(s) specified by 
+the term in question.  
+
+Here, we briefly describe the logic of the code, consisting completely of
+pre-defined macros, surrounding the \code{body} of the change statistic function.
+However, it is not actually necessary to understand this logic thoroughly in order to
+write change statistics functions; simply copy the syntax above.
+The Metropolis-Hastings proposal could possibly involve
 multiple edge toggles, and the job of the change statistic function is to update the
 change statistics as appropriate for the entire set of toggles.
 Since some of the macros, such as \code{ZERO_ALL_CHANGESTATS} and
@@ -786,14 +810,18 @@ the same as type \code{int}), whereas \code{p} and \code{change} are of type
     CHANGE_STAT[0] += IS_OUTEDGE(t,h) ? -change : change;
 \end{CodeInput}
 \end{CodeChunk}
-When the \code{inputs} item was added to the output list of the
-\code{InitErgmTerm.absdiff} function, it consisted of a single
-real number, the exponent, followed by a value of some nodal attribute
-for each of the $n$ nodes.  These inputs may be accessed now as the
-\code{INPUT_PARAMS} vector, which has entries
+The first step in the body of our change statistic function is to read the value of
+the exponent, determine whether or not it equals one, and act
+accordingly.  
+When the \code{inputs} vector was added to the output list of the
+\code{InitErgmTerm.absdiff} function, it consisted of the exponent
+followed by the values of some nodal attribute, one
+for each of the $n$ nodes.  All of these inputs may be accessed now as the
+elements of the \code{INPUT_PARAMS} vector, which has entries
 \code{INPUT_PARAMS[0]} through \code{INPUT_PARAMS[N_INPUT_PARAMS-1]}.
-Thus, the first step in the body of our change statistic function is to read the value of
-the exponent (\code{INPUT_PARAM[0]}), then calculate the absolute value of the
+Thus, the exponent may be read as
+\code{INPUT_PARAM[0]}, which is why the code above sets \code{p} to this value.
+It then calculates the absolute value of the
 difference of the nodal attributes for the nodes numbered \code{t} and \code{h},
 for these are the nodes involved in the proposed toggle.  If necessary (i.e.,
 if \code{p} is not one),
@@ -807,10 +835,10 @@ updated.  Therefore, each edge is listed in two places, so that if the
 edge \code{(t,h)} is currently in the network, both
 \code{IS_OUTEDGE(t,h)} and \code{IS_INEDGE(h,t)} would return one
 rather than zero.\footnote{This is not the same as saying that
-both \code{IS\_OUTEDGE(h,t)} and \code{IS\_INEDGE(t,h)} would return one rather than zero.  This is particularly true for undirected networks, where the edge
+both \code{IS\_OUTEDGE(t,h)} and \code{IS\_INEDGE(t,h)} would return one rather than zero.  This is particularly true for undirected networks, where the edge
 $t\!\longleftrightarrow\!h$ is always stored as
 $t\!\longrightarrow\!h$ where $t<h$, so
-\code{IS\_OUTEDGE(h,t)} would {\em never} return one.}
+\code{IS\_INEDGE(t,h)} would {\em never} return one when $t<h$.}
 In this case, it suffices to check whether \code{(t,h)} is
 an outedge:  If it is, then the toggle would remove the edge and so
 we should add \code{-change} to \code{CHANGE_STAT[0]}; otherwise,
@@ -875,12 +903,13 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
 }
 \end{CodeInput}
 \end{CodeChunk}
-Next we must decide on the arguments for \code{mindegree}.  Certainly we must include at least one argument, the minimum degree.  The \code{degree} term also allows the user to specify, via the \code{by} argument, a nodal attribute on which ego and alter must match in order to be counted. Should we follow suit? For the sake of demonstration, let us do so.  The \code{degree} term also has a \code{homophily}
+Next we must decide on the arguments for \code{mindegree}.  Certainly we must include at least one argument, the minimum degree.  The \code{degree} term also allows the user to specify, via the \code{by} argument, a nodal attribute on which ego and alter must match in order to be counted. 
+For the sake of demonstration, we shall follow suit.  The \code{degree} term also has a \code{homophily}
 argument, whose value is either \code{TRUE} or \code{FALSE}, and when it is
 \code{FALSE} the meaning of the \code{by} argument changes.  We will not
 duplicate the \code{homophily} option in \code{mindegree},
 which is to say we will fix it as \code{TRUE}.
-Note also that the degree term allows users to pass a vector of degrees, not just a single one.  In this case, it seems less likely that a user would be interested in multiple mindegrees than in multiple degrees; we will leave this feature off, and require the first argument to be a single non-negative integer, rather than a vector.  Note that users who are interested in having multiple minimum degree statistics in a single model still have the option of including multiple mindegree terms in their formula.
+Note also that the degree term allows users to pass a vector of degrees, not just a single one.  In this case, it seems less likely that a user would be interested in multiple mindegrees than in multiple degrees; we will leave this feature off, and require the first argument to be a single non-negative integer, rather than a vector of arbitrary length.  Note that users who are interested in having multiple minimum degree statistics in a single model still have the option of including multiple mindegree terms in their formula.
 
 This leaves us with two arguments (let's call them ``mindeg'' and ``by''). These
 are of types numeric and character, respectively; required and optional,
@@ -1054,7 +1083,10 @@ We will need to conduct a different analysis depending on whether
 \code{attrflag} is 0 or 1, so we should first check this value. Remember that in
 the \proglang{R} code we passed the arguments to the \proglang{C} (via the
 \code{inputs} element) in the order: \code{attrflag}, \code{mindeg},
-\code{nodecov}:
+\code{nodecov}.
+Remember also that, whereas
+\proglang{R} indexes its vectors starting at position 1, \proglang{C} does so
+starting at 0;
 \begin{CodeChunk}
 \begin{CodeInput}
   attrflag = INPUT_PARAM[0];
@@ -1079,9 +1111,8 @@ one; likewise, again, for $j$. Looking in the description of the macros in
 \code{changestat.h}, we see that there are macros called \code{IN_DEG} and
 \code{OUT_DEG} to check for the in-degree and out-degree of a node; since we are
 dealing with undirected networks only, which (as mentioned earlier) are stored
-as directed networks, we must check both. Remember also that, whereas
-\proglang{R} indexes its vectors starting at position 1, \proglang{C} does so
-starting at 0. Thus:
+as directed networks, we must check both. 
+Thus:
 \begin{CodeChunk}
 \begin{CodeInput}
 CHANGESTAT_FN(d_mindegree) {
@@ -1128,8 +1159,8 @@ For the version with the nodal attribute, we need to read the values of that att
           if(INPUT_PARAM[node3+1]==t_nodecov){++tdeg;}
         }
         CHANGE_STAT[0] += IS_OUTEDGE(t,h) ?
-          - (hdeg==mindeg) - (tdeg==mindeg) :
-          (hdeg==mindeg-1) + (tdeg==mindeg-1);
+          - (tdeg==mindeg) - (hdeg==mindeg) :
+          (tdeg==mindeg-1) + (hdeg==mindeg-1);
       }else{
         CHANGE_STAT[0] = 0;
       }
@@ -1160,8 +1191,8 @@ CHANGESTAT_FN(d_mindegree) {
       hdeg = IN_DEG[h]+OUT_DEG[h];
       tdeg = IN_DEG[t]+OUT_DEG[t];
       CHANGE_STAT[0] += IS_OUTEDGE(t,h) ?
-        - (hdeg==mindeg) - (tdeg==mindeg) :
-        (hdeg==mindeg-1) + (tdeg==mindeg-1);
+        - (tdeg==mindeg) - (hdeg==mindeg) :
+        (tdeg==mindeg-1) + (hdeg==mindeg-1);
     }else{
       t_nodecov = INPUT_PARAM[t+1];
       h_nodecov = INPUT_PARAM[h+1];
@@ -1181,8 +1212,8 @@ CHANGESTAT_FN(d_mindegree) {
           if(INPUT_PARAM[node3+1]==t_nodecov){++tdeg;}
         }
         CHANGE_STAT[0] += IS_OUTEDGE(t,h) ?
-          - (hdeg==mindeg) - (tdeg==mindeg) :
-          (hdeg==mindeg-1) + (tdeg==mindeg-1);
+          - (tdeg==mindeg) - (hdeg==mindeg) :
+          (tdeg==mindeg-1) + (hdeg==mindeg-1);
       }else{
         CHANGE_STAT[0] = 0;
       }
@@ -1208,13 +1239,13 @@ to ensure that the code is calculating the correct values.
 This paper describes how to extend the exponential-family random graph modeling
 capabilities of the \pkg{statnet} suite of packages by
 explaining how users may use and modify the template package \pkg{ergm.userterms} to develop custom terms that can be ``plugged in" to \pkg{statnet}. These terms can then use the full capabilities of the \pkg{statnet} suite of packages.
-There terms will be computed at the \proglang{C} level and operate at native speeds. In
+These terms will be computed at the \proglang{C} level and operate at native speeds. In
 addition, they will be able to use the parallel capabilities of \pkg{statnet}
 without further changes. 
 %The advantage of a plug-in architecture is that the
 %package will be more portable and be able to take advantage of enhancements to
 %the \pkg{statnet} suite. 
-Finally, users may make the plug-in packages
+Finally, users may make the new terms
 available to the \pkg{statnet} community, hence extending the analysis and
 modeling capabilities of \pkg{statnet}.
 
@@ -1241,7 +1272,7 @@ group, which readers are encouraged to join \citep{statnetusersgroup}.
 
 \section*{Acknowledgments}
 
-We would like to thank the \pkg{statnet} team, including Martina Morris, Carter
+We would like to thank the \pkg{statnet} team, and in particular, Martina Morris, Carter
 Butts, Pavel Krivitsky, and Ayn Leslie-Cook.
 
 \bibliography{v24}
