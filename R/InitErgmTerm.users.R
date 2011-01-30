@@ -154,9 +154,9 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
     attrflag <- 1
     nodecov <- get.node.attr(nw, a$by)
     coef.names <- paste("mindegree.", a$by, a$mindeg, sep="")
+    u <- sort(unique(nodecov))
+    nodecov <- match(nodecov,u)
   }
-  u <- sort(unique(nodecov))
-  nodecov <- match(nodecov,u)
   list(name = "mindegree",
       coef.names = coef.names,
       pkgname = "ergm.userterms",

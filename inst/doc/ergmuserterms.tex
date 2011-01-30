@@ -960,12 +960,15 @@ in a single \code{if} statement:
     attrflag <- 1
     nodecov <- get.node.attr(nw, a$by)
     coef.names <- paste("mindegree.", a$by, a$mindeg, sep=""),
+    u <- sort(unique(nodecov))
+    nodecov <- match(nodecov,u)
   }
 \end{CodeInput}
 \end{CodeChunk}
 
-For the attribute-matching case, the object nodecov now contains a vector of the
-values of that attribute for all the nodes. Within the \pkg{statnet} suite,
+For the attribute-matching case, the object \code{nodecov} contains a vector of the
+values of that attribute for all the nodes following the call to \code{get.node.attr}.
+Within the \pkg{statnet} suite,
 nodal attributes can be either numeric or character-based. It will much easier
 to write \proglang{R} code converting a character-based attribute into a numeric
 than it will be to write \proglang{C} code that can handle either a numeric or
@@ -978,8 +981,8 @@ character-based attribute values with the new numeric ranks. In \proglang{R},
 one example of code to do this is:
 \begin{CodeChunk}
 \begin{CodeInput}
-  u <- sort(unique(nodecov))
-  nodecov <- match(nodecov,u)
+    u <- sort(unique(nodecov))
+    nodecov <- match(nodecov,u)
 \end{CodeInput}
 \end{CodeChunk}
 which has the added benefit of handling an attribute that is passed in as
@@ -1043,9 +1046,9 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
     attrflag <- 1
     nodecov <- get.node.attr(nw, a$by)
     coef.names <- paste("mindegree.", a$by, a$mindeg, sep="")
+    u <- sort(unique(nodecov))
+    nodecov <- match(nodecov,u)
   }
-  u <- sort(unique(nodecov))
-  nodecov <- match(nodecov,u)
   list(name = "mindegree",
       coef.names = coef.names,
       pkgname = "ergm.userterms",
@@ -1086,7 +1089,7 @@ the \proglang{R} code we passed the arguments to the \proglang{C} (via the
 \code{nodecov}.
 Remember also that, whereas
 \proglang{R} indexes its vectors starting at position 1, \proglang{C} does so
-starting at 0;
+starting at 0.  Thus:
 \begin{CodeChunk}
 \begin{CodeInput}
   attrflag = INPUT_PARAM[0];
