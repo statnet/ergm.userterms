@@ -9,7 +9,7 @@ Author: Mark S. Handcock <handcock@ucla.edu>,
         Martina Morris <morrism@u.washington.edu>
         Pavel N. Krivitsky <pavel@stat.cmu.edu>
 Maintainer: David R. Hunter <dhunter@stat.psu.edu>
-Depends: network (>= 1.5-1), ergm (>=2.3)
+Depends: network (>= 1.5-1), ergm (>= 2.3)
 Description:  A template package to demonstrate the use of user-specified statistics for use in "ergm" models as part of the "statnet" suite of packages.
 License: file LICENSE
 URL: http://statnetproject.org
