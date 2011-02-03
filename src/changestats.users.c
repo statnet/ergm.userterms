@@ -1,4 +1,4 @@
-#include "changestats.h"
+#include "changestats.users.h"
 
 CHANGESTAT_FN(d_mindegree) {
 	Vertex h, t, node3;
