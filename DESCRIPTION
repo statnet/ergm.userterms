@@ -1,6 +1,6 @@
 Package: ergm.userterms
-Version: 1.0
-Date: 2011-02-01
+Version: 1.1
+Date: 2011-04-18
 Title:  User-specified terms for the statnet suite of packages
 Author: Mark S. Handcock <handcock@ucla.edu>,
         David R. Hunter <dhunter@stat.psu.edu>,
