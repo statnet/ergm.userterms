@@ -38,7 +38,6 @@ edges in a network structure.
 typedef struct Dur_Infstruct {
   int MCMCtimer;
   int *lasttoggle;
-/*  double mean_edge_duration; This is probably not a good idea */
 } Dur_Inf;
 
 
@@ -57,7 +56,7 @@ typedef struct Dur_Infstruct {
      the smallest index of an edge object not being used.  
    outdegree[] and indegree[] are continually updated to give
      the appropriate degree values for each vertex.  These should
-     point to Vertex-vectors of length nnodes.  
+     point to Vertex-vectors of length nnodes+1.  
    value:  optional value(s) associated with this network 
 */
 typedef struct Networkstruct {
@@ -83,18 +82,20 @@ typedef struct Networkstruct {
 /* Initialization and destruction. */
 Network NetworkInitialize(Vertex *tails, Vertex *heads, Edge nedges,
 			  Vertex nnodes, int directed_flag, Vertex bipartite,
-			  int lasttoggle_flag);
+			  int lasttoggle_flag, int time, int *lasttoggle);
 void NetworkDestroy(Network *nwp);
 Network NetworkInitializeD(double *tails, double *heads, Edge nedges,
 			   Vertex nnodes, int directed_flag, Vertex bipartite,
-			   int lasttoggle_flag);
+			   int lasttoggle_flag, int time, int *lasttoggle);
 
 Network *NetworkCopy(Network *dest, Network *src);
 
 /* Accessors. */
 Edge EdgetreeSearch (Vertex a, Vertex b, TreeNode *edges);
 Edge EdgetreeSuccessor (TreeNode *edges, Edge x);
+Edge EdgetreePredecessor (TreeNode *edges, Edge x);
 Edge EdgetreeMinimum (TreeNode *edges, Edge x);
+Edge EdgetreeMaximum (TreeNode *edges, Edge x);
 
 /* Modifiers. */
 
@@ -116,6 +117,7 @@ void TouchEdge(Vertex tail, Vertex head, Network *nwp);
 
 /* Utility functions. */
 int FindithEdge (Vertex *tail, Vertex *head, Edge i, Network *nwp);
+int GetRandEdge(Vertex *tail, Vertex *head, Network *nwp);
 void printedge(Edge e, TreeNode *edges);
 void InOrderTreeWalk(TreeNode *edges, Edge x);
 void NetworkEdgeList(Network *nwp);
