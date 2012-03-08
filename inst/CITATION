@@ -1,9 +1,9 @@
 authors <- c("Mark S. Handcock", "David R. Hunter", "Carter T. Butts",
              "Steven M. Goodreau", "Martina Morris")
-projhomepage <- "http://statnetproject.org"
+projhomepage <- "statnet.org"
 
 statnettitle <- "statnet: Software Tools for the Statistical Modeling of Network Data"
-statnetversion <- "2.1"
+statnetversion <- "3.0"
 statnetyear <- "2003"
 
 ergmtitle <- "ergm.userterms: User-specified terms for the statnet suite of packages"
@@ -12,6 +12,8 @@ ergmversion <- ergmdesc$Version
 ergmdate <- ergmdesc$Date
 s <- regexpr("20[0-9][0-9]", ergmdate)
 ergmyear <- ifelse (s==-1, "2003", substr(ergmdate, s, s+3))
+ergmauthors <- c(authors, "Pavel N. Krivitsky")[c(1:4,6,5)]
+
       
 
 citHeader(
@@ -38,7 +40,7 @@ citEntry(entry = "Manual",
          url = "http://CRAN.R-project.org/package=statnet")
 
 citEntry(entry="Manual",
-         author = authors,
+         author = ergmauthors,
          title = ergmtitle,
          year         = ergmyear,
          note         = paste("Version ", ergmversion,

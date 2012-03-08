@@ -24,7 +24,7 @@ Markov chain Monte Carlo (MCMC) algorithm. The coding is optimized for speed
 and robustness.
 For detailed information on how to download and install the software,
 go to the \code{\link[ergm]{ergm}} website:
-\url{http://statnetproject.org}.
+\url{statnet.org}.
 A tutorial, support newsgroup, references and links to further
 resources are provided there.
 
@@ -35,7 +35,7 @@ Mark S. Handcock, David R. Hunter, Carter T. Butts, Steven M. Goodreau,
 and Martina Morris. 2003
 \emph{statnet: Software tools for the Statistical Modeling of Network Data}
 \cr
-\url{http://statnetproject.org}.
+\url{statnet.org}.
 
 We have invested a lot of time and effort in creating the
 \code{statnet} suite of packages for use by other researchers.
@@ -67,16 +67,16 @@ For complete citation information, use\cr
    In brief, to add a new term you need to (all file references are relative to the 
    package directory).:
 
-   1.  Download the source version of this package. For example,
+   1.  Download the source version of this package. For example, in R use
    
-             \code{download.packages("ergm.userterms",destdir=".",type="source", contriburl="http://csde.washington.edu/statnet")}
+             \code{download.packages("ergm.userterms", destdir=".", type="source")}
              
       where \code{destdir} is the directory to save the source
-      (e.g., \code{ergm.userterms_2.0.tar.gz}) in.
+      (e.g., \code{ergm.userterms_3.0.tar.gz}) in.
 
      2.  Unpack the source into a directory
               (e.g., on LINUX or the Mac 
-               \code{tar -vzxf ergm.userterms_2.0.tar.gz}).
+               \code{tar -vzxf ergm.userterms_3.0.tar.gz}).
 
      3.  Optionally, rename the package name from 
               \code{ergm.userterms} to some something
@@ -100,9 +100,9 @@ For complete citation information, use\cr
             See the example below.
 }
 \references{
-Hunter DR, Goodreau SM, Handcock MS (2010)
-{\pkg{ergm.userterms}: {A} Template for Building
-Plug-in Packages for \pkg{statnet}}.
+Hunter DR, Goodreau SM, Handcock MS (2011)
+{\pkg{ergm.userterms}: {A} Template Package for 
+Extending \pkg{statnet}}.
 }
 \seealso{statnet, network, ergm, ergm-terms}
 \examples{

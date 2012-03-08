@@ -1,0 +1,5 @@
+
+useDynLib(ergm.userterms)
+
+# Export all names
+exportPattern(".")

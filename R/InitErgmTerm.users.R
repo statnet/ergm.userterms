@@ -135,8 +135,8 @@
 #  -------------------------------------------------------------------------- 
 
 #  This InitErgmTerm function is for the mindegree term described
-#  in Hunter, Goodreau, and Handcock (2010), "ergm.userterms:  A
-#  Template for Building Plug-in Packages for statnet"
+#  in Hunter, Goodreau, and Handcock (2011), "ergm.userterms:  A
+#  Template Package for Extending statnet"
 InitErgmTerm.mindegree <- function(nw, arglist, ...) {
   a <- check.ErgmTerm(nw, arglist, directed=FALSE, bipartite=FALSE,
       varnames = c("mindeg", "by"),
