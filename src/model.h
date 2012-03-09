@@ -19,7 +19,7 @@ typedef struct Modelstruct {
 			  termarray[i].nstats                    */
 } Model;
 
-Model* ModelInitialize (char *fnames, char *sonames, double *inputs,
+Model* ModelInitialize (char *fnames, char *sonames, double **inputs,
 			int n_terms);
 
 void ModelDestroy(Model *m);
@@ -29,14 +29,11 @@ void ModelDestroy(Model *m);
    to an array of ModelTerm structures.  */
 
 int GetIndexForAttrValue(int value);
-int ModelTermHamming (char *fnames, int n_terms);
-int ModelTermFormation (char *fnames, int n_terms);
-int ModelTermDissolve (char *fnames, int n_terms);
-
 
 /* *** don't forget tail-> head, so this function accepts toggletail first, not togglehead  */
 
 void ChangeStats(unsigned int ntoggles, Vertex *toggletail, Vertex *togglehead, Network *nwp, Model *m);
+void ChangeStatsT(Network *nwp, Model *m);
 
 #endif
 
