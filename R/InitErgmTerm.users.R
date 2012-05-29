@@ -167,3 +167,7 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
 }
 
 
+
+
+
+
