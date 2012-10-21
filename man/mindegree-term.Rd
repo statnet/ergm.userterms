@@ -1,5 +1,6 @@
 \name{mindegree-term}
 \alias{mindegree}
+\alias{ergm-terms}
 \alias{InitErgmTerm.mindegree}
 \docType{methods}
 \title{New Minimum Degree Term for the 'ergm' Package}
