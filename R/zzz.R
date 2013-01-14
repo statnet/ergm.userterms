@@ -1,5 +1,6 @@
 .onAttach <- function(lib, pkg){
-  packageStartupMessage(mkStartupMessage("ergm.userterms"))
+  sm <- statnetStartupMessage("ergm.userterms", FALSE, FALSE)
+  if(!is.null(sm)) packageStartupMessage(sm)
 }
 
 
