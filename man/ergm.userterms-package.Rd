@@ -99,9 +99,11 @@ For complete citation information, use\cr
             See the example below.
 }
 \references{
-Hunter DR, Goodreau SM, Handcock MS (2011)
+Hunter DR, Goodreau SM, Handcock MS (2013).
 {\pkg{ergm.userterms}: {A} Template Package for 
-Extending \pkg{statnet}}.
+Extending \pkg{statnet}}, Journal of Statistical
+Software 52(2), 1-25,
+URL http://www.jstatsoft.org/v52/i02/.
 }
 \seealso{statnet, network, ergm, ergm-terms}
 \examples{
