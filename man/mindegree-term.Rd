@@ -64,10 +64,14 @@ adding new terms.
 }
 %\value{\code{\link{ergm}} returns an object of class 'ergm' that is a list.
 %}
-%\references{
-%\itemize{
-%}
-\seealso{ergm, network, ergm-terms}
+\references{
+Hunter DR, Goodreau SM, Handcock MS (2013).
+{\pkg{ergm.userterms}: {A} Template Package for 
+Extending \pkg{statnet}}, Journal of Statistical
+Software 52(2), 1-25,
+URL http://www.jstatsoft.org/v52/i02/.
+}
+\seealso{statnet, network, ergm, ergm-terms}
 \examples{
 \dontrun{
 data(florentine)
