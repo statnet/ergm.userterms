@@ -1,62 +1,21 @@
-authors <- c("Mark S. Handcock", "David R. Hunter", "Carter T. Butts",
-             "Steven M. Goodreau", "Martina Morris")
-projhomepage <- "statnet.org"
+citHeader("To cite ergm.userterms in publications use:")
 
-statnettitle <- "statnet: Software Tools for the Statistical Modeling of Network Data"
-statnetversion <- "3.0"
-statnetyear <- "2003"
+citEntry(entry = "Article",
+  title        = "{ergm.userterms}: A Template Package for Extending {statnet}",
+  author       = personList(as.person("David R. Hunter"),
+                   as.person("Steven M. Goodreau"),
+                   as.person("Mark S. Handcock")),
+  journal      = "Journal of Statistical Software",
+  year         = "2013",
+  volume       = "52",
+  number       = "2",
+  pages        = "1--25",
+  url          = "http://www.jstatsoft.org/v52/i02/",
 
-ergmtitle <- "ergm.userterms: User-specified terms for the statnet suite of packages"
-ergmdesc <- packageDescription("ergm.userterms")
-ergmversion <- ergmdesc$Version
-ergmdate <- ergmdesc$Date
-s <- regexpr("20[0-9][0-9]", ergmdate)
-ergmyear <- ifelse (s==-1, "2003", substr(ergmdate, s, s+3))
-ergmauthors <- c(authors, "Pavel N. Krivitsky")[c(1:4,6,5)]
+  textVersion  =
+  paste("David R. Hunter, Steven M. Goodreau, Mark S. Handcock (2013).",
+        "ergm.userterms: A Template Package for Extending statnet.",
+        "Journal of Statistical Software, 52(2), 1-25.",
+        "URL http://www.jstatsoft.org/v52/i02/.")
+)
 
-      
-
-citHeader(
-   "'ergm.userterms' is part of the statnet suite of packages.  ",
-   'Please read the license using license.statnet("ergm.userterms").\n\n',
-   "If you are using the 'ergm.userterms' package for research that will be published, ",
-   "we request that you acknowledge this by citing 'statnet' as shown below.\n\n",
-   "To cite the individual package 'ergm.userterms', please use the second citation below.\n\n",
-   'For BibTeX format, use toBibtex(citation("ergm.userterms")).',
-   sep="")
-   
-citEntry(entry = "Manual",
-         textVersion = paste(paste(authors, collapse=", "), " (", statnetyear,
-                             "). ", statnettitle, ". Version ", statnetversion,
-                             ". Project home page at ", projhomepage, 
-                             ". URL http://CRAN.R-project.org/package=statnet.",
-                             sep=""),
-         title = statnettitle, 
-         author = authors, 
-         year = statnetyear,
-         note = paste("Version ", statnetversion, ". Project home page at ",
-                      "\\url{", projhomepage, "}", sep=""),
-         address = "Seattle, WA",
-         url = "http://CRAN.R-project.org/package=statnet")
-
-citEntry(entry="Manual",
-         author = ergmauthors,
-         title = ergmtitle,
-         year         = ergmyear,
-         note         = paste("Version ", ergmversion,
-                        ".  Project home page at \\url{", projhomepage, "}", 
-                        sep=""),
-         address      = "Seattle, WA",
-         url          = "http://CRAN.R-project.org/package=ergm.userterms",
-         textVersion = paste(paste(authors, collapse=", "), " (", ergmyear,
-               "), ", ergmtitle, ". Version ", ergmversion,
-               ". Project home page at ", projhomepage,
-               ". URL http://CRAN.R-project.org/package=ergm.userterms.",
-               sep="")
-         )
-
-         
-citFooter("We have invested a lot of time and effort in creating the",
-          "'statnet' suite of packages for use by other researchers.",
-          "Please cite it in all papers where it is used.")
-          
