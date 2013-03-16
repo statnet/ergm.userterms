@@ -1,0 +1,5 @@
+%\VignetteIndexEntry{ergm.userterms: A Template Package for Extending statnet}
+\documentclass{article}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\end{document}
