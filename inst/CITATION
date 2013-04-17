@@ -2,4 +2,14 @@ library(statnet.common)
 statnet.cite.head("ergm.userterms")
 statnet.cite.pkg("ergm")
 statnet.cite.pkg("ergm.userterms")
+bibentry("Article",
+         title = "ergm.userterms: A Template Package for Extending statnet",
+         author = personList(as.person("David R. Hunter"),
+           as.person("Steven M. Goodreau"),
+           as.person("Mark S. Handcock")),
+         journal = "Journal of Statistical Software",
+         year = 2013,
+         volume = 52,
+         number = 2,
+	 pages = "1--25")
 statnet.cite.foot("ergm.userterms")
