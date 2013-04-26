@@ -82,7 +82,7 @@ URL http://www.jstatsoft.org/v52/i02/.
 }
 \seealso{statnet, network, ergm, ergm-terms}
 \examples{
-\dontrun{
+\donttest{
 data(florentine)
 summary(flomarriage~mindegree(3))
 summary(flomarriage~mindegree(1,by="priorates"))

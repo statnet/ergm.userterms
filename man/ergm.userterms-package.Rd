@@ -118,7 +118,7 @@ URL http://www.jstatsoft.org/v52/i02/.
 \examples{
 data(faux.mesa.high)
 summary(faux.mesa.high~mindegree(2))
-fit <- ergm(faux.mesa.high~mindegree(2), MPLEonly=TRUE)
+fit <- ergm(faux.mesa.high~mindegree(2), estimate="MPLE")
 summary(fit)
 }
 \keyword{ package }
