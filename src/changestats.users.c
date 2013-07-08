@@ -48,4 +48,3 @@ CHANGESTAT_FN(d_mindegree) {
   UNDO_PREVIOUS_TOGGLES(i);
 }
 
-
