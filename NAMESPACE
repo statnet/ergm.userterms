@@ -1,5 +1,7 @@
 
 useDynLib(ergm.userterms)
 
+import(statnet.common,network,ergm)
+
 # Export all names
 exportPattern(".")
