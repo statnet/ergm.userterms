@@ -1,4 +1,0 @@
-%\VignetteIndexEntry{ergm.userterms: A Template Package for Extending statnet}
-\documentclass{article}
-\begin{document}
-\end{document}
