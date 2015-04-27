@@ -1,7 +1,7 @@
 Package: ergm.userterms
 Version: 3.2-12097-2013.08.03-23.06.45
 Date: 2013-08-03
-Title:  User-specified terms for the statnet suite of packages
+Title:  User-specified Terms for the statnet Suite of Packages
 Authors@R: c(
 	   person("Mark S.", "Handcock", role=c("aut"), email="handcock@stat.ucla.edu"),
            person("David R.", "Hunter", role=c("aut"), email="dhunter@stat.psu.edu"),
