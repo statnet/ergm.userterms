@@ -1,5 +1,5 @@
 Package: ergm.userterms
-Version: 3.9-95
+Version: 3.9-96
 Date: 2018-08-25
 Title:  User-specified Terms for the statnet Suite of Packages
 Authors@R: c(
@@ -10,7 +10,8 @@ Authors@R: c(
            person("Pavel N.", "Krivitsky", role=c("aut","cre"), email="pavel@uow.edu.au", comment=c(ORCID="0000-0002-9101-3362")),
      	   person("Martina", "Morris", role=c("aut"), email="morrism@u.washington.edu"))
 LinkingTo: ergm
-Depends: network (>= 1.7-1), ergm (>= 3.9), statnet.common
+Depends: network (>= 1.7-1), ergm (>= 3.9)
+Imports: statnet.common
 Description:  A template package to demonstrate the use of user-specified statistics for use in "ergm" models as part of the "statnet" suite of packages.
 License: GPL-3 + file LICENSE
 URL: http://statnet.org

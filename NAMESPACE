@@ -1,7 +1,8 @@
 
 useDynLib(ergm.userterms)
 
-import(statnet.common,network,ergm)
+import(network,ergm)
+importFrom(statnet.common, statnetStartupMessage)
 
 # Export all names
 exportPattern(".")
