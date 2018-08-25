@@ -4,8 +4,3 @@ r:
 - devel
 sudo: false
 cache: packages
-r_github_packages:
-- statnet/network-private
-- statnet/statnet.common-private
-- statnet/ergm-private
-warnings_are_errors: false
