@@ -1,5 +1,5 @@
 Package: ergm.userterms
-Version: 3.10.0-111
+Version: 3.10.0
 Date: 2019-05-15
 Title:  User-specified Terms for the statnet Suite of Packages
 Authors@R: c(
