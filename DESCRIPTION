@@ -15,3 +15,4 @@ Imports: statnet.common (>= 4.1)
 Description:  A template package to demonstrate the use of user-specified statistics for use in 'ergm' models as part of the Statnet suite of packages.
 License: GPL-3 + file LICENSE
 URL: http://statnet.org
+BugReports: https://github.com/statnet/ergm.userterms/issues
