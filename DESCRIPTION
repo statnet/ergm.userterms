@@ -10,7 +10,7 @@ Authors@R: c(
            person("Pavel N.", "Krivitsky", role=c("aut","cre"), email="pavel@uow.edu.au", comment=c(ORCID="0000-0002-9101-3362")),
      	   person("Martina", "Morris", role=c("aut"), email="morrism@u.washington.edu"))
 LinkingTo: ergm
-Depends: network (>= 1.7-1), ergm (>= 3.9)
+Depends: network (>= 1.7-1), ergm (>= 3.10)
 Imports: statnet.common (>= 4.1)
 Description:  A template package to demonstrate the use of user-specified statistics for use in 'ergm' models as part of the Statnet suite of packages.
 License: GPL-3 + file LICENSE
