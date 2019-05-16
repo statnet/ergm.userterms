@@ -149,7 +149,7 @@
 InitErgmTerm.mindegree <- function(nw, arglist, ...) {
   a <- check.ErgmTerm(nw, arglist, directed=FALSE, bipartite=FALSE,
       varnames = c("mindeg", "by"),
-      vartypes = c("numeric", "character"),
+      vartypes = c("numeric", ERGM_VATTR_SPEC),
       required = c(TRUE, FALSE),
       defaultvalues = list(NULL, NULL))
   if(length(a$mindeg) > 1)
@@ -161,8 +161,9 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
     coef.names <- paste("mindegree", a$mindeg, sep="")
   } else {
     attrflag <- 1
-    nodecov <- get.node.attr(nw, a$by)
-    coef.names <- paste("mindegree.", a$by, a$mindeg, sep="")
+    nodecov <- ergm_get_vattr(a$by, nw)
+    attrname <- attr(nodecov, "name")
+    coef.names <- paste("mindegree.", attrname, a$mindeg, sep="")
     u <- sort(unique(nodecov))
     nodecov <- match(nodecov,u)
   }
