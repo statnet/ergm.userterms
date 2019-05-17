@@ -30,9 +30,8 @@ number of nodes in the network of at least degree \code{mindeg}.
 That is, the statistic equals the number of nodes in the
 network with \code{mindeg} or more edges.
 The optional argument
-    \code{by} is a character string giving the name of an
-attribute in the
-    network's vertex attribute list.
+    \code{by} specifies a vertex attribute (see \code{\link[ergm:node-attr]{Specifying Vertex
+	Attributes and Levels}} for details).
     If this is specified, 
     then degrees are calculated using the subnetwork consisting
 of only
