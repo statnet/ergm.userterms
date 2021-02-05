@@ -1,6 +1,5 @@
 # `ergm.userterms`: User-specified Terms for the statnet Suite of Packages
 
-[![Build Status](https://travis-ci.org/statnet/ergm.userterms.svg?branch=master)](https://travis-ci.org/statnet/ergm.userterms)
 [![rstudio mirror downloads](https://cranlogs.r-pkg.org/badges/ergm.userterms?color=2ED968)](https://cranlogs.r-pkg.org/)
 [![cran version](https://www.r-pkg.org/badges/version/ergm.userterms)](https://cran.r-project.org/package=ergm.userterms)
 [![R build status](https://github.com/statnet/ergm.userterms/workflows/R-CMD-check/badge.svg)](https://github.com/statnet/ergm.userterms/actions)
