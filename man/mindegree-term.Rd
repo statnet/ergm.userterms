@@ -82,7 +82,7 @@ URL http://www.jstatsoft.org/v52/i02/.
 \seealso{statnet, network, ergm, ergm-terms}
 \examples{
 \donttest{
-data(florentine)
+data(flomarriage, package="statnet.data")
 summary(flomarriage~mindegree(3))
 summary(flomarriage~mindegree(1,by="priorates"))
 fit <- ergm(flomarriage~edges+mindegree(1,by="priorates"))

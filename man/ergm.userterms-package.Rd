@@ -116,7 +116,7 @@ URL http://www.jstatsoft.org/v52/i02/.
 }
 \seealso{statnet, network, ergm, ergm-terms}
 \examples{
-data(faux.mesa.high)
+data(faux.mesa.high, package="statnet.data")
 summary(faux.mesa.high~mindegree(2))
 fit <- ergm(faux.mesa.high~mindegree(2), estimate="MPLE")
 summary(fit)
