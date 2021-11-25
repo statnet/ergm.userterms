@@ -8,7 +8,7 @@
 #  Copyright 2012-2019 Statnet Commons
 #######################################################################
 library(ergm.userterms)
-data(florentine)
+data(flomarriage, data="statnet.data")
 summary(flomarriage~mindegree(3))
 summary(flomarriage~mindegree(1,by="priorates"))
 fit <- ergm(flomarriage~edges+mindegree(1,by="priorates"))
