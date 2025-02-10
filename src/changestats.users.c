@@ -7,53 +7,35 @@
  *
  *  Copyright 2012-2019 Statnet Commons
  */
-#include "changestats.users.h"
+#include "ergm_changestat.h"
 
-CHANGESTAT_FN(d_mindegree) {
-  Vertex t, h, node3;
-  int i, mindeg, hdeg, tdeg;
-  Edge e;
-  int attrflag;
-  double t_nodecov, h_nodecov;
-
-  ZERO_ALL_CHANGESTATS(i);
-  FOR_EACH_TOGGLE(i) {
-    t = TAIL(i); h = HEAD(i);
-    attrflag = INPUT_PARAM[0];
-    mindeg = INPUT_PARAM[1];
-    if(attrflag==0){
-      tdeg = IN_DEG[t]+OUT_DEG[t];
-      hdeg = IN_DEG[h]+OUT_DEG[h];
-      CHANGE_STAT[0] += IS_UNDIRECTED_EDGE(t,h) ?
+C_CHANGESTAT_FN(c_mindegree) {
+  Rboolean attrflag = IINPUT_PARAM[0];
+  Vertex mindeg = IINPUT_PARAM[1];
+  if(attrflag==0){
+    Vertex tdeg = IN_DEG[tail]+OUT_DEG[tail];
+    Vertex hdeg = IN_DEG[head]+OUT_DEG[head];
+    CHANGE_STAT[0] += edgestate ?
+      - (tdeg==mindeg) - (hdeg==mindeg) :
+      (tdeg==mindeg-1) + (hdeg==mindeg-1);
+  }else{
+    unsigned int t_nodecov = IINPUT_PARAM[tail+1];
+    unsigned int h_nodecov = IINPUT_PARAM[head+1];
+    if (t_nodecov == h_nodecov) {
+      Vertex tdeg = 0;
+      EXEC_THROUGH_EDGES(tail, e, node3, { /* step through edges of tail */
+          if(IINPUT_PARAM[node3+1]==t_nodecov) tdeg++;
+        });
+      Vertex hdeg = 0;
+      EXEC_THROUGH_EDGES(head, e, node3, { /* step through edges of head */
+          if(IINPUT_PARAM[node3+1]==h_nodecov) hdeg++;
+        });
+      CHANGE_STAT[0] += edgestate ?
         - (tdeg==mindeg) - (hdeg==mindeg) :
         (tdeg==mindeg-1) + (hdeg==mindeg-1);
     }else{
-      t_nodecov = INPUT_PARAM[t+1];
-      h_nodecov = INPUT_PARAM[h+1];
-      if (t_nodecov == h_nodecov) {
-        tdeg = 0;
-        STEP_THROUGH_OUTEDGES(t, e, node3) { /* step through outedges of tail */
-          if(INPUT_PARAM[node3+1]==t_nodecov){++tdeg;}
-        }
-        STEP_THROUGH_INEDGES(t, e, node3) { /* step through inedges of tail */
-          if(INPUT_PARAM[node3+1]==t_nodecov){++tdeg;}
-        }
-        hdeg = 0;
-        STEP_THROUGH_OUTEDGES(h, e, node3) { /* step through outedges of head */
-          if(INPUT_PARAM[node3+1]==h_nodecov){++hdeg;}
-        }
-        STEP_THROUGH_INEDGES(h, e, node3) { /* step through inedges of head */
-          if(INPUT_PARAM[node3+1]==h_nodecov){++hdeg;}
-        }
-        CHANGE_STAT[0] += IS_UNDIRECTED_EDGE(t,h) ?
-          - (tdeg==mindeg) - (hdeg==mindeg) :
-          (tdeg==mindeg-1) + (hdeg==mindeg-1);
-      }else{
-        CHANGE_STAT[0] = 0;
-      }
+      CHANGE_STAT[0] = 0;
     }
-    TOGGLE_IF_MORE_TO_COME(i);
   }
-  UNDO_PREVIOUS_TOGGLES(i);
 }
 
