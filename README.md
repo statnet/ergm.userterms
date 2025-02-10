@@ -4,7 +4,7 @@
 [![cran version](https://www.r-pkg.org/badges/version/ergm.userterms)](https://cran.r-project.org/package=ergm.userterms)
 [![R build status](https://github.com/statnet/ergm.userterms/workflows/R-CMD-check/badge.svg)](https://github.com/statnet/ergm.userterms/actions)
 
-A template package to demonstrate the use of user-specified statistics for use in 'ergm' models as part of the Statnet suite of packages.
+A non-CRAN template package to demonstrate the use of user-specified statistics for use in 'ergm' models as part of the Statnet suite of packages.
 
 ## Public and Private repositories
 
