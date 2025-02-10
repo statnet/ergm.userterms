@@ -7,6 +7,8 @@
 #
 #  Copyright 2012-2019 Statnet Commons
 #######################################################################
+#' @useDynLib ergm.userterms
+#' @import ergm statnet.common network
 .onAttach <- function(lib, pkg){
   sm <- statnetStartupMessage("ergm.userterms", c("statnet"), FALSE)
   if(!is.null(sm)){
