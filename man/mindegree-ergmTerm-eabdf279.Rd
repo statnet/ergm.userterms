@@ -40,5 +40,4 @@ and conventions.
 \Sexpr[results=rd,stage=render]{ergm:::.formatTermKeywords("ergmTerm", "mindegree", "subsection")}
 }
 \concept{categorical nodal attribute}
-\concept{frequently-used}
 \concept{undirected}

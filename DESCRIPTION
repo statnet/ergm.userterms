@@ -1,6 +1,6 @@
 Package: ergm.userterms
 Version: 4.0.0
-Date: 2019-05-15
+Date: 2025-02-10
 Title: User-specified Terms for the statnet Suite of Packages
 Authors@R: c(
 	   person("Mark S.", "Handcock", role=c("aut"), email="handcock@stat.ucla.edu"),

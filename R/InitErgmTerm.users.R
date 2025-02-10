@@ -62,7 +62,8 @@
 #'   same value of the `by` attribute.
 #'
 ### Import the standard ergmTerm documentation template so that it
-### gets indexed in ?ergmTerm.
+### gets indexed in ?ergmTerm. This and other templates can be copied
+### from 'ergm' source code on GitHub, in the man-roxygen/ directory.
 ###
 #' @template ergmTerm-general
 #'
@@ -82,7 +83,6 @@
 ###
 #' @concept undirected
 #' @concept categorical nodal attribute
-#' @concept frequently-used
 ###
 ### No @export!
 InitErgmTerm.mindegree <- function(nw, arglist, ...) {
@@ -116,8 +116,71 @@ InitErgmTerm.mindegree <- function(nw, arglist, ...) {
   )
 }
 
+#' @templateVar name sqrt.triangle
+#'
+#' @title Square root of the number of triangles
+#'
+#' @description These terms add one network statistic to the model,
+#'   the square root of the number of triangles. They demonstrate the
+#'   private and auxiliary storage mechanisms. The change statistic
+#'   for the square root of the number of triangles depends on the
+#'   initial number of triangles, so it is costly to compute -- unless
+#'   one can keep track of the number of triangles. These terms can
+#'   only be used with undirected networks.
+#'
+#' @usage
+#' # binary: sqrt.triangle
+#'
+#' @template ergmTerm-general
+#'
+#' @examples
+#'
+#' data(florentine)
+#'
+#' sqrt(summary(flomarriage~triangle))
+#' summary(flomarriage~sqrt.triangle)
+#'
+#' stopifnot(sqrt(summary(flomarriage~triangle)) == summary(flomarriage~sqrt.triangle))
+#'
+#' @concept undirected
+#' @concept triadic
+InitErgmTerm.sqrt.triangle <- function(nw, arglist, ...) {
+  # No arguments:
+  a <- check.ErgmTerm(nw, arglist, directed=FALSE, bipartite=FALSE)
 
+  # coef.names can have nonstandard characters:
+  list(name = "sqrt_triangle", coef.names = "sqrt(triangle)", dependence = TRUE)
+}
 
+### This also demonstrates how to document multiple terms in one
+### file. The following two Roxygen lines generate code to merge the
+### documentation into the sqrt.triangle-ergmTerm documentation. Note
+### that the alias has to be set manually.
+#' @templateVar name sqrt.triangle
+#' @template ergmTerm-rdname
+#' @aliases sqrt.triangle.aux-ergmTerm
+#' @usage
+#' # binary: sqrt.triangle.aux
+#'
+#' @examples
+#' summary(flomarriage~sqrt.triangle.aux)
+#'
+#' stopifnot(sqrt(summary(flomarriage~triangle)) == summary(flomarriage~sqrt.triangle.aux))
+InitErgmTerm.sqrt.triangle.aux <- function(nw, arglist, ...) {
+  # No arguments:
+  a <- check.ErgmTerm(nw, arglist, directed=FALSE, bipartite=FALSE)
 
+  # coef.names can have nonstandard characters:
+  list(name = "sqrt_triangle_aux", coef.names = "sqrt(triangle)", dependence = TRUE,
+       auxiliaries = ~.triangle) # Request the triangles auxiliary.
+}
 
+### Auxiliaries don't generally get public documentation, since they
+### are not invoked by end-users directly.
+InitErgmTerm..triangle <- function(nw, arglist, ...) {
+  # No arguments:
+  a <- check.ErgmTerm(nw, arglist, directed=FALSE, bipartite=FALSE)
 
+  # coef.names can have nonstandard characters:
+  list(name = "_triangle") # coef.names is an empty vector -> auxiliary
+}
