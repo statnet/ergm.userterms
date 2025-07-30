@@ -45,31 +45,46 @@ C_CHANGESTAT_FN(c_mindegree) {
  Square root of triangles: The private storage approach.
 *****************/
 
+typedef struct {
+  double ntri, change;
+  Vertex tail, head;
+} StoreDoubleAndDyadAndDouble;
+
 /* Initializer: store the number of triangles in its private storage. */
 I_CHANGESTAT_FN(i_sqrt_triangle) {
-  ALLOC_STORAGE(1, double, ntri); /* Allocate private storage for 1 number to store the current number of triangles. */
+  ALLOC_STORAGE(1, StoreDoubleAndDyadAndDouble, sto); /* Allocate private storage for 1 number to store the current number of triangles, plus forward-looking toggle. */
 
   /* NB: In an undirected network, tail < head. */
   EXEC_THROUGH_NET_EDGES(tail, head, e1, { /* For each edge (tail < head) in the network... */
       EXEC_THROUGH_FOUTEDGES(head, e, node3, { /* and each edge (head < node3)... */
-          *ntri += IS_OUTEDGE(tail, node3); /* a triangle is formed if an edge exists between node3 and tail. */
+          sto->ntri += IS_OUTEDGE(tail, node3); /* a triangle is formed if an edge exists between node3 and tail. */
       });
     });
 
   /* *ntri now contains the number of triangles in the network. */
 }
 
-/* Updater: will be called when toggling (tail, head) with state edgestate is imminent. */
-U_CHANGESTAT_FN(u_sqrt_triangle) {
-  GET_STORAGE(double, ntri); /* Obtain a pointer to private storage and cast it to the correct type. */
-  double change = 0;
+static inline U_CHANGESTAT_FN(calc_change_ntri) { /* Not actually a u_ function, but has the same API. */
+  GET_STORAGE(StoreDoubleAndDyadAndDouble, sto); /* Obtain a pointer to private storage and cast it to the correct type. */
+  if(sto->tail == tail && sto->head == head) return; /* Already calculated. */
 
+  double change = 0;
   EXEC_THROUGH_EDGES(head, e, node3, { /* For each edge of head... */
       change += IS_UNDIRECTED_EDGE(node3, tail); /* A shared neighbor between tail and head exists if an edge exists between node3 and tail. */
     });
 
+  sto->tail = tail;
+  sto->head = head;
+  sto->change = edgestate ? -change : change;
+}
+
+/* Updater: will be called when toggling (tail, head) with state edgestate is imminent. */
+U_CHANGESTAT_FN(u_sqrt_triangle) {
+  GET_STORAGE(StoreDoubleAndDyadAndDouble, sto); /* Obtain a pointer to private storage and cast it to the correct type. */
+  calc_change_ntri(tail, head, mtp, nwp, edgestate);
   /* Thus the toggle of (tail, head) will change the triangle statistic. */
-  *ntri += edgestate ? -change : change;
+  sto->ntri += sto->change;
+  sto->tail = 0; /* Invalidate storage. */
 }
 
 /* Cleanup; done automatically when STORAGE != NULL, so not needed in this case. */
@@ -79,15 +94,11 @@ U_CHANGESTAT_FN(u_sqrt_triangle) {
 
 /* Change statistic: can refer to its storage. */
 C_CHANGESTAT_FN(c_sqrt_triangle) {
-  GET_STORAGE(double, ntri); /* Obtain a pointer to private storage and cast it to the correct type. */
-  double change = 0;
-
-  EXEC_THROUGH_EDGES(head, e, node3, { /* For each edge of head... */
-      change += IS_UNDIRECTED_EDGE(node3, tail); /* A shared neighbor between tail and head exists if an edge exists between node3 and tail. */
-    });
+  GET_STORAGE(StoreDoubleAndDyadAndDouble, sto); /* Obtain a pointer to private storage and cast it to the correct type. */
+  calc_change_ntri(tail, head, mtp, nwp, edgestate);
 
   /* Now, we add the new value of the statistic and subtract the old. */
-  CHANGE_STAT[0] += sqrt(*ntri + (edgestate ? -change : change)) - sqrt(*ntri);
+  CHANGE_STAT[0] += sqrt(sto->ntri + sto->change) - sqrt(sto->ntri);
 }
 
 
